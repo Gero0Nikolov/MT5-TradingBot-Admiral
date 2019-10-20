@@ -119,6 +119,7 @@ class TREND {
    double risk_low_price_24;
    double risk_hours_counter;
    double rsi;
+   bool is_init;
 
    TREND() {
       this.direction = 0;
@@ -128,9 +129,10 @@ class TREND {
       this.risk_high_price = 7900;
       this.risk_low_price = 6300;
       this.risk_high_price_24 = 0;
-      this.risk_low_price_24 = 100000;
+      this.risk_low_price_24 = 0;
       this.risk_hours_counter = 0;   
       this.rsi = 50;
+      this.is_init = false;
    }
 
    bool is_stable( string direction ) {
@@ -145,9 +147,9 @@ class TREND {
       return flag;
    }
 
-   void reset_risk_24() {
-      this.risk_high_price_24 = 0;
-      this.risk_low_price_24 = 100000;
+   void reset_risk_24( HOUR &hour_ ) {
+      this.risk_high_price_24 = hour_.highest_price;
+      this.risk_low_price_24 = hour_.lowest_price;
       this.risk_hours_counter = 0;
    }
 };
@@ -234,7 +236,7 @@ void OnTick() {
          trend_.risk_hours_counter += 1;
 
          // Reset the Trend Risk for 24 hours if needed
-         if ( trend_.risk_hours_counter >= 24 ) { trend_.reset_risk_24(); }         
+         if ( trend_.risk_hours_counter >= 24 ) { trend_.reset_risk_24( hour_ ); }         
 
          // Reset the hour
          hour_.reset(); 
@@ -250,6 +252,12 @@ void OnTick() {
          hour_.buy_price = current_tick.ask;
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
+
+         // Set Trend Risk Prices they are = 0
+         if ( !trend_.is_init ) {
+            trend_.risk_high_price_24 = hour_.highest_price;
+            trend_.risk_low_price_24 = hour_.lowest_price;
+         }
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
