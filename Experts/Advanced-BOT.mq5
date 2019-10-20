@@ -63,7 +63,6 @@ class HOUR {
          )
       ) {
          flag = true;
-         Print( "Direction: "+ direction );
       }
 
       return flag;
@@ -119,6 +118,7 @@ class TREND {
    double risk_high_price_24;
    double risk_low_price_24;
    double risk_hours_counter;
+   double rsi;
 
    TREND() {
       this.direction = 0;
@@ -129,7 +129,8 @@ class TREND {
       this.risk_low_price = 6300;
       this.risk_high_price_24 = 0;
       this.risk_low_price_24 = 100000;
-      this.risk_hours_counter = 0;
+      this.risk_hours_counter = 0;   
+      this.rsi = 50;
    }
 
    bool is_stable( string direction ) {
@@ -182,13 +183,17 @@ POSITION position_;
 MqlTradeRequest order_request = {0};
 MqlTradeResult order_result;
 
+// RSI
+double rsi_buffer[];
+double rsi_handler;
+
 // Expert initialization function                                   |
 int OnInit(){   
    return(INIT_SUCCEEDED);
 }
 
 // Expert deinitialization function                                 |
-void OnDeinit(const int reason) {   
+void OnDeinit(const int reason) {
 }
 
 // Expert tick function                                             |
@@ -229,7 +234,7 @@ void OnTick() {
          trend_.risk_hours_counter += 1;
 
          // Reset the Trend Risk for 24 hours if needed
-         if ( trend_.risk_hours_counter >= 24 ) { trend_.reset_risk_24(); }
+         if ( trend_.risk_hours_counter >= 24 ) { trend_.reset_risk_24(); }         
 
          // Reset the hour
          hour_.reset(); 
@@ -270,6 +275,11 @@ void OnTick() {
             minute_.buy_price = current_tick.ask;
             minute_.lowest_price = hour_.opening_price;
             minute_.highest_price = hour_.opening_price;
+
+            // Recalculate RSI
+            rsi_handler = iRSI( Symbol(), PERIOD_M1, 10, PRICE_CLOSE );
+            CopyBuffer( rsi_handler, 0, 0, 1, rsi_buffer );
+            trend_.rsi = rsi_buffer[ 0 ];            
          } else if ( minute_.is_set == true ) {         
             minute_.sell_price = current_tick.bid;
             minute_.actual_price = current_tick.bid;
@@ -307,6 +317,7 @@ void OnTick() {
                   hour_.is_in_direction( "sell" ) &&
                   !hour_.is_big() &&
                   !is_risky_deal( "sell" ) &&
+                  trend_.rsi > 30 &&
                   minute_.actual_price > trend_.risk_low_price &&
                   minute_.opening_price - minute_.actual_price >= instrument_.opm      
                ) {                  
@@ -317,6 +328,7 @@ void OnTick() {
                   hour_.is_in_direction( "buy" ) &&
                   !hour_.is_big() &&
                   !is_risky_deal( "buy" ) &&
+                  trend_.rsi < 70 &&
                   minute_.actual_price < trend_.risk_high_price &&
                   minute_.actual_price - minute_.opening_price >= instrument_.opm
                ) {                  
