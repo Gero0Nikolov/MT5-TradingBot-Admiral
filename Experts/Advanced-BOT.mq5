@@ -10,6 +10,7 @@
 // Include Functions
 // EXAMPLE: #include "../Include/test.mqh"
 #include "../Include/Actions/OpenPosition.mqh";
+#include "../Include/Actions/ClosePosition.mqh";
 #include "../Include/Actions/IsRiskyDeal.mqh";
 
 // Initialize Classes
@@ -102,15 +103,14 @@ class INSTRUMENT_SETUP {
    INSTRUMENT_SETUP() {
       this.name = "NQ100";
       this.opm = 10;
-      this.tpm = 0.2 / 100;
-      this.slm = 0.66 / 100;      
+      this.tpm = 0.66;
+      this.slm = 0.66;      
    }
 };
 
 class TREND {
    public:
-   int direction; // -1 = Negative; 0 = Neutral; 1 = Positive;
-   int last_direction; // -1 = Negative; 0 = Neutral; 1 = Positive;
+   int direction; // -1 = Negative; 0 = Neutral; 1 = Positive;   
    int analyzed_hours;
    double last_hour_actual_price;   
    double risk_high_price;
@@ -119,11 +119,11 @@ class TREND {
    double risk_low_price_24;
    double risk_hours_counter;
    double rsi;
+   double bulls_power;
    bool is_init;
 
    TREND() {
-      this.direction = 0;
-      this.last_direction = this.direction;
+      this.direction = 0;      
       this.analyzed_hours = 0;
       this.last_hour_actual_price = 0;      
       this.risk_high_price = 7900;
@@ -132,25 +132,8 @@ class TREND {
       this.risk_low_price_24 = 0;
       this.risk_hours_counter = 0;   
       this.rsi = 50;
+      this.bulls_power = 0;
       this.is_init = false;
-   }
-
-   bool is_stable( string direction ) {
-      bool flag = false;
-
-      if ( direction == "sell" ) {
-         flag = this.direction <= this.last_direction ? true : false;
-      } else if ( direction == "buy" ) {
-         flag = this.direction >= this.last_direction ? true : false;
-      }
-
-      return flag;
-   }
-
-   void reset_risk_24( HOUR &hour_ ) {
-      this.risk_high_price_24 = hour_.highest_price;
-      this.risk_low_price_24 = hour_.lowest_price;
-      this.risk_hours_counter = 0;
    }
 };
 
@@ -160,17 +143,35 @@ class POSITION {
    string type;
    double opening_price;
    int volume;
+   bool is_opened;
+   double profit;
+   bool select;
+   double price_difference;
+   double difference_in_percentage;
+   int ticket_id;
 
    POSITION() {
       this.id = 0;
       this.opening_price = 0;
       this.volume = 0;
+      this.is_opened = false;
+      this.profit = 0;
+      this.select = false;
+      this.price_difference = 0;
+      this.difference_in_percentage = 0;
+      this.ticket_id = 0;
    }
 
    void reset() {
       this.id += 1;
       this.opening_price = 0;
-      this.volume = 0;      
+      this.volume = 0;
+      this.is_opened = false;
+      this.profit = 0;
+      this.select = false;
+      this.price_difference = 0;
+      this.difference_in_percentage = 0;
+      this.ticket_id = 0;
    }
 };
 
@@ -188,6 +189,10 @@ MqlTradeResult order_result;
 // RSI
 double rsi_buffer[];
 double rsi_handler;
+
+// BULLS POWER
+double bulls_power_buffer[];
+double bulls_power_handler;
 
 // Expert initialization function                                   |
 int OnInit(){   
@@ -212,31 +217,10 @@ void OnTick() {
       if ( hour_.is_set && current_time_structure.hour != hour_.key ) {
          // Trend Analysis
          trend_.analyzed_hours += 1;         
-         trend_.last_direction = trend_.direction;
 
          if ( hour_.is_big() ) {
             trend_.direction = hour_.actual_price > trend_.last_hour_actual_price ? trend_.direction + 1 : ( hour_.actual_price < trend_.last_hour_actual_price ? trend_.direction - 1 : trend_.direction );
-
-            if ( 
-               hour_.is_stable( "sell" ) &&
-               trend_.risk_low_price_24 > hour_.lowest_price
-            ) {
-               trend_.risk_low_price_24 = hour_.lowest_price;
-            } else if (
-               hour_.is_stable( "buy" ) && 
-               trend_.risk_high_price_24 < hour_.highest_price
-            ) {
-               trend_.risk_high_price_24 = hour_.highest_price;
-            }
-         }
-
-         trend_.last_hour_actual_price = hour_.actual_price;
-
-         // Update Trend Risk Counter   
-         trend_.risk_hours_counter += 1;
-
-         // Reset the Trend Risk for 24 hours if needed
-         if ( trend_.risk_hours_counter >= 24 ) { trend_.reset_risk_24( hour_ ); }         
+         } 
 
          // Reset the hour
          hour_.reset(); 
@@ -287,7 +271,12 @@ void OnTick() {
             // Recalculate RSI
             rsi_handler = iRSI( Symbol(), PERIOD_M1, 10, PRICE_CLOSE );
             CopyBuffer( rsi_handler, 0, 0, 1, rsi_buffer );
-            trend_.rsi = rsi_buffer[ 0 ];            
+            trend_.rsi = rsi_buffer[ 0 ];          
+
+            // Recalculate Bulls Power
+            bulls_power_handler = iBullsPower( Symbol(), PERIOD_M1, 10 );
+            CopyBuffer( bulls_power_handler, 0, 0, 1, bulls_power_buffer );
+            trend_.bulls_power = bulls_power_buffer[ 0 ];
          } else if ( minute_.is_set == true ) {         
             minute_.sell_price = current_tick.bid;
             minute_.actual_price = current_tick.bid;
@@ -297,35 +286,14 @@ void OnTick() {
          }
 
          // Slicing Time if there is no opened position
-         if ( PositionsTotal() == 0 ) {
-            // if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            //    if (
-            //       hour_.is_in_direction( "sell" ) &&
-            //       !hour_.is_big() &&
-            //       trend_.direction < 0 &&
-            //       trend_.is_stable( "sell" ) &&
-            //       minute_.opening_price - minute_.actual_price >= instrument_.opm
-            //    ) {                  
-            //       open_position( "sell", current_tick.bid );
-            //    }
-            // } else if ( minute_.opening_price < minute_.actual_price ) { // Buy
-            //    if (
-            //       hour_.is_in_direction( "buy" ) &&
-            //       !hour_.is_big() &&
-            //       trend_.direction > 0 &&
-            //       trend_.is_stable( "buy" ) &&
-            //       minute_.actual_price - minute_.opening_price >= instrument_.opm
-            //    ) {                  
-            //       open_position( "buy", current_tick.ask );
-            //    }
-            // }   
-
+         if ( !position_.is_opened ) {
             if ( minute_.opening_price > minute_.actual_price ) { // Sell
                if (
                   hour_.is_in_direction( "sell" ) &&
                   !hour_.is_big() &&
-                  !is_risky_deal( "sell" ) &&
+                  //!is_risky_deal( "sell" ) &&
                   trend_.rsi > 30 &&
+                  trend_.bulls_power < 0 &&
                   minute_.actual_price > trend_.risk_low_price &&
                   minute_.opening_price - minute_.actual_price >= instrument_.opm      
                ) {                  
@@ -335,12 +303,42 @@ void OnTick() {
                if (
                   hour_.is_in_direction( "buy" ) &&
                   !hour_.is_big() &&
-                  !is_risky_deal( "buy" ) &&
+                  //!is_risky_deal( "buy" ) &&
                   trend_.rsi < 70 &&
+                  trend_.bulls_power > 0 &&
                   minute_.actual_price < trend_.risk_high_price &&
                   minute_.actual_price - minute_.opening_price >= instrument_.opm
                ) {                  
                   open_position( "buy", current_tick.ask );
+               }
+            }
+         } else if ( position_.is_opened ) {
+            position_.select = PositionSelectByTicket( position_.ticket_id );
+            position_.profit = PositionGetDouble( POSITION_PROFIT );
+
+            if ( position_.profit > 10 ) { // Take Profit Listener
+               if ( position_.type == "sell" ) {
+                  position_.price_difference = position_.opening_price - hour_.actual_price;
+                  position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
+                  
+                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "sell" ); }
+               } else if ( position_.type == "buy" ) {
+                  position_.price_difference = hour_.actual_price - position_.opening_price;
+                  position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
+                  
+                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "buy" ); }
+               }
+            } else if ( position_.profit <= 0 ) { // Stop Loss Listener
+               if ( position_.type == "sell" ) {
+                  position_.price_difference = hour_.actual_price - position_.opening_price;
+                  position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
+                  
+                  if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "sell" ); }
+               } else if ( position_.type == "buy" ) {
+                  position_.price_difference = position_.opening_price - hour_.actual_price ;
+                  position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
+                  
+                  if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "buy" ); }
                }
             }
          }

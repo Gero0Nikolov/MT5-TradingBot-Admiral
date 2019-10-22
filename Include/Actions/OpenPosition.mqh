@@ -1,14 +1,7 @@
 void open_position( string type, double price ) {
     double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
     int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );
-    int volume = ( ( free_margin / 2 ) * account_leverage ) / price;
-
-    // Reset the Position Object
-    position_.reset();
-
-    // MQL Order Preparation
-    MqlTradeRequest order_request = {0};
-    MqlTradeResult order_result;
+    double volume = NormalizeDouble( ( ( free_margin / 2 ) * account_leverage ) / price, 1 );    
 
     // Calculate Stop Loss price
     double stop_loss = 0;
@@ -31,8 +24,8 @@ void open_position( string type, double price ) {
     order_request.volume = volume;
     order_request.price = price;
     order_request.stoplimit = NULL;
-    order_request.sl = stop_loss;
-    order_request.tp = take_profit;
+    order_request.sl = NULL;
+    order_request.tp = NULL;
     order_request.deviation = NULL;
 
     // Execute the Order
@@ -40,8 +33,13 @@ void open_position( string type, double price ) {
 
     // If everything went smoothly proceed with Position Data setup
     if ( is_opened_order ) {
+        ZeroMemory( order_request );
+        ZeroMemory( order_result );
+
         position_.type = type;
         position_.opening_price = price;
         position_.volume = volume; 
+        position_.is_opened = true;
+        position_.ticket_id = PositionGetTicket( 0 );
     }
 }
