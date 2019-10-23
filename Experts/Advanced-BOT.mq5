@@ -11,6 +11,7 @@
 // EXAMPLE: #include "../Include/test.mqh"
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
+#include "../Include/Actions/Logger.mqh";
 // #include "../Include/Actions/IsRiskyDeal.mqh";
 
 // Initialize Classes
@@ -104,7 +105,7 @@ class INSTRUMENT_SETUP {
       this.name = "NQ100";
       this.opm = 10;
       this.tpm = 0.66;
-      this.slm = 0.66;      
+      this.slm = 1;      
    }
 };
 
@@ -165,12 +166,37 @@ class POSITION {
    }
 };
 
+class ACCOUNT {
+   public:
+   string currency;
+   double currency_exchange_rate;
+   double trading_percent;
+
+   ACCOUNT() {
+      // Get Account Currency
+      this.currency = AccountInfoString( ACCOUNT_CURRENCY );
+
+      // Set Currency Exchange Rate to USD (Because NQ100 is USD :O)
+      if ( this.currency == "EUR" ) {
+         this.currency_exchange_rate = 1.11;
+      } else if ( this.currency == "BGN" ) {
+         this.currency_exchange_rate = 0.57;
+      } else if ( this.currency == "USD" ) {
+         this.currency_exchange_rate = 1;
+      }
+
+      // Set Trading Percent (How much of your account are you willing to play with)
+      this.trading_percent = 50.0 / 100.0;
+   }
+};
+
 // Trading Objects
 HOUR hour_;
 MINUTE minute_;
 INSTRUMENT_SETUP instrument_;
 TREND trend_;
 POSITION position_;
+ACCOUNT account_;
 
 // MQL Defaults
 MqlTradeRequest order_request = {0};
@@ -186,6 +212,11 @@ double bulls_power_handler;
 
 // Expert initialization function                                   |
 int OnInit(){   
+   logger( "Account Currency", -69, account_.currency );
+   logger( "Currency Exchange Rate", account_.currency_exchange_rate );
+   logger( "Trading Percent", account_.trading_percent );
+   logger( "Free Margin", AccountInfoDouble( ACCOUNT_FREEMARGIN ) * account_.currency_exchange_rate );
+   logger( "Leverage", AccountInfoInteger( ACCOUNT_LEVERAGE ) );   
    return(INIT_SUCCEEDED);
 }
 
@@ -199,7 +230,7 @@ void OnTick() {
    
    if ( SymbolInfoTick( Symbol(), current_tick ) ) {
       MqlDateTime current_time_structure;
-   
+
       datetime current_time = TimeTradeServer();
       TimeToStruct( current_time, current_time_structure );         
       

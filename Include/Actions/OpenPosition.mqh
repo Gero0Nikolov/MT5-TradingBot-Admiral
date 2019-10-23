@@ -1,7 +1,7 @@
 void open_position( string type, double price ) {
-    double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
-    int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );
-    double volume = NormalizeDouble( ( ( free_margin / 2 ) * account_leverage ) / price, 1 );    
+    double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN ) * account_.currency_exchange_rate;
+    int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );    
+    double volume = NormalizeDouble( ( ( free_margin * account_.trading_percent ) * account_leverage ) / price, 1 );
 
     // Check if volume is above 100 and set the maximum for the Admiral Markets broker = 100
     if ( volume > 100 ) { volume = 100; }
@@ -44,5 +44,10 @@ void open_position( string type, double price ) {
         position_.volume = volume; 
         position_.is_opened = true;
         position_.ticket_id = PositionGetTicket( 0 );
+
+        logger( "Position Opened", position_.ticket_id );
+        logger( "Position Price", position_.opening_price );
+        logger( "Position Type", -69, position_.type );
+        logger( "Position Volume", position_.volume );
     }
 }
