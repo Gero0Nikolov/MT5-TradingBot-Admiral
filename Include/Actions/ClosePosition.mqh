@@ -20,5 +20,8 @@ void close_position( string type_ ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
         position_.reset();
+
+        // Suggest Withdraw
+        account_.suggest_withdraw();
     }
 }

@@ -171,6 +171,8 @@ class ACCOUNT {
    string currency;
    double currency_exchange_rate;
    double trading_percent;
+   double initial_deposit;
+   double withdraw_percentage;
 
    ACCOUNT() {
       // Get Account Currency
@@ -181,6 +183,12 @@ class ACCOUNT {
 
       // Set Trading Percent (How much of your account are you willing to play with)
       this.trading_percent = 50.0 / 100.0;
+
+      // Set the Initial Deposit on BOT start
+      this.initial_deposit = AccountInfoDouble( ACCOUNT_FREEMARGIN );
+
+      // Set withdraw percentage
+      this.withdraw_percentage = 10;
    }
 
    void set_currency_exchange_rate() {
@@ -190,6 +198,32 @@ class ACCOUNT {
          this.currency_exchange_rate = NormalizeDouble( 1.000 / SymbolInfoDouble( "USDBGN", SYMBOL_BID ), 2 );
       } else if ( this.currency == "USD" ) {
          this.currency_exchange_rate = 1.000;
+      }
+   }
+
+   void suggest_withdraw() {
+      double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
+      double difference_between_id_fm = free_margin - this.initial_deposit;
+
+      // Check if the account is profitable
+      if ( difference_between_id_fm > 0 ) {
+         double difference_between_id_fm_percentage = ( difference_between_id_fm / this.initial_deposit ) * 100;
+         
+         // Check if the BOT managed to make 50% profit and if so send an email
+         if ( difference_between_id_fm_percentage > this.withdraw_percentage ) {
+            string cookie = NULL, headers;
+            char post[], result[];
+            string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+            string data = "action=mt5_suggest_withdraw&api_key="+ api_key +"&withdraw_percentage="+ this.withdraw_percentage;
+            StringToCharArray( data, post );
+            string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+            ResetLastError();
+
+            int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+
+            if ( res == -1 ) { Print( "Error in WebRequest. Error code: ",GetLastError() ); }
+         }
       }
    }
 };
@@ -216,16 +250,18 @@ double bulls_power_handler;
 
 // Expert initialization function                                   |
 int OnInit(){   
+   logger( "Initial Deposit", account_.initial_deposit );
    logger( "Account Currency", -69, account_.currency );
    logger( "Currency Exchange Rate", account_.currency_exchange_rate );
    logger( "Trading Percent", account_.trading_percent );
-   logger( "Free Margin", AccountInfoDouble( ACCOUNT_FREEMARGIN ) * account_.currency_exchange_rate );
-   logger( "Leverage", AccountInfoInteger( ACCOUNT_LEVERAGE ) );   
+   logger( "Free Margin", account_.initial_deposit * account_.currency_exchange_rate );
+   logger( "Leverage", AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+
    return(INIT_SUCCEEDED);
 }
 
 // Expert deinitialization function                                 |
-void OnDeinit(const int reason) {
+void OnDeinit(const int reason) {   
 }
 
 // Expert tick function                                             |
