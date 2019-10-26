@@ -204,9 +204,6 @@ class ACCOUNT {
       double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
       double difference_between_id_fm = free_margin - this.initial_deposit;
 
-      // DEBUG:
-      difference_between_id_fm = 1000;
-
       // Check if the account is profitable
       if ( difference_between_id_fm > 0 ) {
          double difference_between_id_fm_percentage = ( difference_between_id_fm / this.initial_deposit ) * 100;
