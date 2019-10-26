@@ -12,7 +12,6 @@
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
 #include "../Include/Actions/Logger.mqh";
-// #include "../Include/Actions/IsRiskyDeal.mqh";
 
 // Initialize Classes
 class HOUR {   
@@ -205,6 +204,9 @@ class ACCOUNT {
       double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
       double difference_between_id_fm = free_margin - this.initial_deposit;
 
+      // DEBUG:
+      difference_between_id_fm = 1000;
+
       // Check if the account is profitable
       if ( difference_between_id_fm > 0 ) {
          double difference_between_id_fm_percentage = ( difference_between_id_fm / this.initial_deposit ) * 100;
@@ -214,7 +216,7 @@ class ACCOUNT {
             string cookie = NULL, headers;
             char post[], result[];
             string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
-            string data = "action=mt5_suggest_withdraw&api_key="+ api_key +"&withdraw_percentage="+ this.withdraw_percentage;
+            string data = "action=mt5_suggest_withdraw&api_key="+ api_key +"&withdraw_percentage="+ this.withdraw_percentage +"&profit="+ difference_between_id_fm;
             StringToCharArray( data, post );
             string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
 
@@ -331,7 +333,6 @@ void OnTick() {
             if (
                hour_.is_in_direction( "sell" ) &&
                !hour_.is_big() &&
-               //!is_risky_deal( "sell" ) &&
                trend_.rsi > 30 &&
                trend_.bulls_power < 0 &&
                minute_.actual_price > trend_.risk_low_price &&
@@ -343,7 +344,6 @@ void OnTick() {
             if (
                hour_.is_in_direction( "buy" ) &&
                !hour_.is_big() &&
-               //!is_risky_deal( "buy" ) &&
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
                minute_.actual_price < trend_.risk_high_price &&
