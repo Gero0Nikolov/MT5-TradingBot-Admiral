@@ -1,4 +1,8 @@
 void open_position( string type, double price ) {
+    // Reset the Currency Exchange Rate
+    account_.set_currency_exchange_rate();
+
+    // Calculate Position Setup
     double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN ) * account_.currency_exchange_rate;
     int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );    
     double volume = NormalizeDouble( ( ( free_margin * account_.trading_percent ) * account_leverage ) / price, 1 );
@@ -44,10 +48,5 @@ void open_position( string type, double price ) {
         position_.volume = volume; 
         position_.is_opened = true;
         position_.ticket_id = PositionGetTicket( 0 );
-
-        logger( "Position Opened", position_.ticket_id );
-        logger( "Position Price", position_.opening_price );
-        logger( "Position Type", -69, position_.type );
-        logger( "Position Volume", position_.volume );
     }
 }

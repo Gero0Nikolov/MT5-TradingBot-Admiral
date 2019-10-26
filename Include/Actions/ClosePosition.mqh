@@ -16,10 +16,7 @@ void close_position( string type_ ) {
 
     bool is_closed_order = OrderSend( order_request,order_result );    
 
-    if ( is_closed_order ) {      
-        logger( "Position Closed", position_.ticket_id );
-        logger( "Position Profit", position_.profit );        
-
+    if ( is_closed_order ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
         position_.reset();

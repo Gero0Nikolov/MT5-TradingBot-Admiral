@@ -120,8 +120,8 @@ class TREND {
 
    TREND() {
       this.last_hour_actual_price = 0;      
-      this.risk_high_price = 7900;
-      this.risk_low_price = 6300;  
+      this.risk_high_price = 8000;
+      this.risk_low_price = 6200;
       this.rsi = 50;
       this.bulls_power = 0;
       this.is_init = false;
@@ -176,17 +176,21 @@ class ACCOUNT {
       // Get Account Currency
       this.currency = AccountInfoString( ACCOUNT_CURRENCY );
 
-      // Set Currency Exchange Rate to USD (Because NQ100 is USD :O)
-      if ( this.currency == "EUR" ) {
-         this.currency_exchange_rate = 1.11;
-      } else if ( this.currency == "BGN" ) {
-         this.currency_exchange_rate = 0.57;
-      } else if ( this.currency == "USD" ) {
-         this.currency_exchange_rate = 1;
-      }
+      // Set Currency Exchange Rate to USD (Because NQ100 is USD :O)      
+      this.set_currency_exchange_rate();
 
       // Set Trading Percent (How much of your account are you willing to play with)
       this.trading_percent = 50.0 / 100.0;
+   }
+
+   void set_currency_exchange_rate() {
+      if ( this.currency == "EUR" ) {
+         this.currency_exchange_rate = NormalizeDouble( SymbolInfoDouble( "EURUSD", SYMBOL_BID ), 2 );
+      } else if ( this.currency == "BGN" ) {
+         this.currency_exchange_rate = NormalizeDouble( 1.000 / SymbolInfoDouble( "USDBGN", SYMBOL_BID ), 2 );
+      } else if ( this.currency == "USD" ) {
+         this.currency_exchange_rate = 1.000;
+      }
    }
 };
 
