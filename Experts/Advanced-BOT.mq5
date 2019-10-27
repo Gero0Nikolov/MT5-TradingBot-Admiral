@@ -25,6 +25,10 @@ class HOUR {
    double lowest_price;
    double highest_price;
    
+   HOUR() {
+      this.reset();
+   }
+
    void reset() {
       this.is_set = false;
       this.key = 0;
@@ -81,6 +85,10 @@ class MINUTE {
    double lowest_price;
    double highest_price;
    
+   MINUTE() {
+      this.reset();
+   }
+
    void reset() {
       this.is_set = false;      
       this.key = 0;
@@ -221,7 +229,7 @@ class ACCOUNT {
 
             int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-            if ( res == -1 ) { Print( "Error in WebRequest. Error code: ",GetLastError() ); }
+            if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
          }
       }
    }
