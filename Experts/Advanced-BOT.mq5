@@ -101,6 +101,25 @@ class MINUTE {
    }
 };
 
+class DAY {
+   public:
+   bool big_move_happaned;
+   string big_move_direction;
+   bool is_set;
+   int date_key;
+
+   DAY() {
+      this.reset();
+   }
+
+   void reset() {
+      this.big_move_happaned = false;
+      this.big_move_direction = "";
+      this.is_set = false;
+      this.date_key = 0;
+   }
+};
+
 class INSTRUMENT_SETUP {
    public:
    string name;
@@ -238,6 +257,7 @@ class ACCOUNT {
 // Trading Objects
 HOUR hour_;
 MINUTE minute_;
+DAY day_;
 INSTRUMENT_SETUP instrument_;
 TREND trend_;
 POSITION position_;
@@ -279,10 +299,32 @@ void OnTick() {
       MqlDateTime current_time_structure;
 
       datetime current_time = TimeTradeServer();
-      TimeToStruct( current_time, current_time_structure );         
+      TimeToStruct( current_time, current_time_structure );
+      
+      if ( !day_.is_set ) { // Set the Day Date if it's not set already
+         day_.date_key = current_time_structure.year + current_time_structure.mon + current_time_structure.day;
+         day_.is_set = true;
+      } else if ( day_.is_set ) { // If the Day Date was already set, listen for the next they to reset it.
+         if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.date_key ) {
+            day_.reset();
+         }
+      }
       
       // Reset the Hour
-      if ( hour_.is_set && current_time_structure.hour != hour_.key ) { hour_.reset(); }
+      if ( hour_.is_set && current_time_structure.hour != hour_.key ) { 
+         if (
+            hour_.is_big() &&
+            (
+               hour_.is_stable( "sell" ) ||
+               hour_.is_stable( "buy" )
+            )
+         ) {
+            day_.big_move_happaned = true;
+            day_.big_move_direction = hour_.is_stable( "sell" ) ? "sell" : ( hour_.is_stable( "buy" ) ? "buy" : "" );
+         }
+
+         hour_.reset(); 
+      }
       
       // Init the Hour or just Update it
       if ( !hour_.is_set ) {

@@ -5,7 +5,7 @@ void open_position( string type, double price ) {
     // Calculate Position Setup
     double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN ) * account_.currency_exchange_rate;
     int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );
-    int volume = ( free_margin * account_.trading_percent ) * account_leverage / price;
+    int volume = (int)( free_margin * account_.trading_percent ) * account_leverage / price;
 
     // Check if volume is above 100 and set the maximum for the Admiral Markets broker = 100
     if ( volume > 100 ) { volume = 100; }
