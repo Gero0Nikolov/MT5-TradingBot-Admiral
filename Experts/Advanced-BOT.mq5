@@ -124,7 +124,7 @@ class DAY {
       this.set_yesterday_market_info();
 
       // Get News for Today
-      calendar_.get_calendar_values( time, 1, "day" );
+      //calendar_.get_calendar_values( time, 1, "day" );
    }
 
    void set_yesterday_market_info() {
@@ -176,24 +176,19 @@ class CALENDAR {
 
       // Get News
       this.got_values = CalendarValueHistory( this.values, from, to, this.country_code, NULL );
-      
-      ArrayPrint( this.values );
 
       // Clear Risk Values
       ZeroMemory( this.risk_values );
       int count_risk_values = 0;
 
       // Find risk values
-      for ( int count_values = 0; count_values < ArraySize( this.values ); count_values++ ) {
-         Print( this.values[ count_values ].impact_type );
+      for ( int count_values = 0; count_values < ArraySize( this.values ); count_values++ ) {         
          if ( this.values[ count_values ].impact_type >= 2 ) {
             ArrayResize( this.risk_values, count_risk_values + 1 );
             this.risk_values[ count_risk_values ] = this.values[ count_values ];
             count_risk_values += 1;
          }
       }
-
-      ArrayPrint( this.risk_values );
    }
 };
 
