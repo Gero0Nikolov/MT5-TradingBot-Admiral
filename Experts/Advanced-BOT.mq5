@@ -122,6 +122,9 @@ class DAY {
       
       this.key = time_structure.year + time_structure.mon + time_structure.day;
       this.set_yesterday_market_info();
+
+      // Get News for Today
+      calendar_.get_calendar_values( time, 1, "day" );
    }
 
    void set_yesterday_market_info() {
@@ -137,6 +140,60 @@ class DAY {
       this.yesterday_highest = rate[ 0 ].high;
       this.yesterday_lowest = rate[ 0 ].low;
       this.yesterday_direction = yesterday_opening > yesterday_closing ? "sell" : ( yesterday_opening < yesterday_closing ? "buy" : "" );
+   }
+};
+
+class CALENDAR {
+   public:
+   string country_code;
+   MqlCalendarValue values[];
+   bool got_values;
+   MqlCalendarValue risk_values[];
+
+   CALENDAR( string alpha_2_code ) {
+      this.country_code = alpha_2_code;
+      this.got_values = false;
+   }
+
+   /*
+   *  Function Arguments: 
+   *  1) From [DATETIME]
+   *  2) Extender [INT]: With what amount the current time should be extended
+   *  3) Extender_type [STRING]: Type of the extender: Minute, Hour, Day
+   */
+   void get_calendar_values( datetime from, int extender, string extender_type ) {
+      // Convert extender to the proper amount of seconds
+      if ( extender_type == "minute" ) {
+         extender *= 60; // 60 seconds in 1 minute
+      } else if ( extender_type == "hour" ) {
+         extender *= 60 * 60; // 60 minutes * 60 seconds (in each minute) * extender to find the hours extender
+      } else if ( extender_type == "day" ) {
+         extender *= 24 * 60 * 60; // 24 hours * 60 minutes * 60 seconds * extender
+      }
+
+      // Find the new DateTime
+      datetime to = from + extender;
+
+      // Get News
+      this.got_values = CalendarValueHistory( this.values, from, to, this.country_code, NULL );
+      
+      ArrayPrint( this.values );
+
+      // Clear Risk Values
+      ZeroMemory( this.risk_values );
+      int count_risk_values = 0;
+
+      // Find risk values
+      for ( int count_values = 0; count_values < ArraySize( this.values ); count_values++ ) {
+         Print( this.values[ count_values ].impact_type );
+         if ( this.values[ count_values ].impact_type >= 2 ) {
+            ArrayResize( this.risk_values, count_risk_values + 1 );
+            this.risk_values[ count_risk_values ] = this.values[ count_values ];
+            count_risk_values += 1;
+         }
+      }
+
+      ArrayPrint( this.risk_values );
    }
 };
 
@@ -275,6 +332,7 @@ class ACCOUNT {
 };
 
 // Trading Objects
+CALENDAR calendar_( "US" );
 HOUR hour_;
 MINUTE minute_;
 DAY day_;
@@ -299,7 +357,7 @@ double bulls_power_handler;
 int OnInit(){   
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
-   Print( "Currency Exchange Rate"+ account_.currency_exchange_rate );
+   Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
@@ -321,8 +379,8 @@ void OnTick() {
       datetime current_time = TimeTradeServer();
       TimeToStruct( current_time, current_time_structure );
       
-      if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) { 
-         day_.reset(); 
+      if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) {
+         day_.reset();   
       }
       
       // Reset the Hour
@@ -388,6 +446,7 @@ void OnTick() {
                trend_.bulls_power < 0 &&
                //!is_risky_deal( "sell" ) &&
                minute_.actual_price > trend_.risk_low_price &&
+               minute_.actual_price < trend_.risk_high_price &&
                minute_.opening_price - minute_.actual_price >= instrument_.opm      
             ) {                  
                open_position( "sell", current_tick.bid );
@@ -399,6 +458,7 @@ void OnTick() {
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
                //!is_risky_deal( "buy" ) &&
+               minute_.actual_price > trend_.risk_low_price &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.actual_price - minute_.opening_price >= instrument_.opm
             ) {                  
