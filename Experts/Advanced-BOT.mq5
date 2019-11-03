@@ -267,14 +267,19 @@ class POSITION {
 class ACCOUNT {
    public:
    string currency;
+   string broker;
    double currency_exchange_rate;
    double trading_percent;
    double initial_deposit;
    double withdraw_percentage;
+   int ping_counter;
 
    ACCOUNT() {
       // Get Account Currency
       this.currency = AccountInfoString( ACCOUNT_CURRENCY );
+
+      // Set Broker Name
+      this.broker = "AdmiralMarkets";
 
       // Set Currency Exchange Rate to USD (Because NQ100 is USD :O)      
       this.set_currency_exchange_rate();
@@ -287,6 +292,9 @@ class ACCOUNT {
 
       // Set withdraw percentage
       this.withdraw_percentage = 10;
+
+      // Set Ping Counter to 0
+      this.ping_counter = 0;
    }
 
    void set_currency_exchange_rate() {
@@ -322,6 +330,28 @@ class ACCOUNT {
 
             if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
          }
+      }
+   }
+
+   void ping() {
+      if ( this.ping_counter == 4 ) {
+         string cookie = NULL, headers;
+         char post[], result[];
+         string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+         string data = "action=mt5_ping&api_key="+ api_key +"&broker="+ this.broker;
+         StringToCharArray( data, post );
+         string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+         ResetLastError();
+
+         int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+
+         if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+
+         // Reset the Ping Counter
+         this.ping_counter = 0;
+      } else {
+         this.ping_counter += 1;
       }
    }
 };
@@ -423,6 +453,9 @@ void OnTick() {
          bulls_power_handler = iBullsPower( Symbol(), PERIOD_M1, 10 );
          CopyBuffer( bulls_power_handler, 0, 0, 1, bulls_power_buffer );
          trend_.bulls_power = bulls_power_buffer[ 0 ];
+
+         // Send Ping
+         account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
