@@ -11,7 +11,7 @@
 // EXAMPLE: #include "../Include/test.mqh"
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
-#include "../Include/Actions/Logger.mqh";
+#include "../Include/Actions/IsRiskyDeal.mqh";
 
 // Initialize Classes
 class HOUR {   
@@ -102,21 +102,41 @@ class MINUTE {
 };
 
 class DAY {
-   public:
-   bool big_move_happaned;
-   string big_move_direction;
-   bool is_set;
-   int date_key;
+   public:      
+   int key;
+   datetime yesterday_date;
+   double yesterday_opening;
+   double yesterday_closing;
+   double yesterday_highest;
+   double yesterday_lowest;
+   string yesterday_direction;
 
    DAY() {
       this.reset();
    }
 
    void reset() {
-      this.big_move_happaned = false;
-      this.big_move_direction = "";
-      this.is_set = false;
-      this.date_key = 0;
+      MqlDateTime time_structure;
+      datetime time = TimeTradeServer();
+      TimeToStruct( time, time_structure );
+      
+      this.key = time_structure.year + time_structure.mon + time_structure.day;
+      this.set_yesterday_market_info();
+   }
+
+   void set_yesterday_market_info() {
+      // Get Yesterday Market Info
+      int day_shift = 1;
+      MqlRates rate[];
+      CopyRates( Symbol(), PERIOD_D1, day_shift, 1, rate );
+      
+      // Set Yesterday Market Info
+      this.yesterday_date = rate[ 0 ].time;
+      this.yesterday_opening = rate[ 0 ].open;
+      this.yesterday_closing = rate[ 0 ].close;
+      this.yesterday_highest = rate[ 0 ].high;
+      this.yesterday_lowest = rate[ 0 ].low;
+      this.yesterday_direction = yesterday_opening > yesterday_closing ? "sell" : ( yesterday_opening < yesterday_closing ? "buy" : "" );
    }
 };
 
@@ -277,18 +297,19 @@ double bulls_power_handler;
 
 // Expert initialization function                                   |
 int OnInit(){   
-   logger( "Initial Deposit", account_.initial_deposit );
-   logger( "Account Currency", -69, account_.currency );
-   logger( "Currency Exchange Rate", account_.currency_exchange_rate );
-   logger( "Trading Percent", account_.trading_percent );
-   logger( "Free Margin", account_.initial_deposit * account_.currency_exchange_rate );
-   logger( "Leverage", AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+   Print( "Initial Deposit: "+ account_.initial_deposit );
+   Print( "Account Currency: "+ account_.currency );
+   Print( "Currency Exchange Rate"+ account_.currency_exchange_rate );
+   Print( "Trading Percent: "+ account_.trading_percent );
+   Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
+   Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+   Print( "Yesterday Date: "+ day_.yesterday_date );
 
    return(INIT_SUCCEEDED);
 }
 
 // Expert deinitialization function                                 |
-void OnDeinit(const int reason) {   
+void OnDeinit(const int reason) {
 }
 
 // Expert tick function                                             |
@@ -297,32 +318,15 @@ void OnTick() {
    
    if ( SymbolInfoTick( Symbol(), current_tick ) ) {
       MqlDateTime current_time_structure;
-
       datetime current_time = TimeTradeServer();
       TimeToStruct( current_time, current_time_structure );
       
-      if ( !day_.is_set ) { // Set the Day Date if it's not set already
-         day_.date_key = current_time_structure.year + current_time_structure.mon + current_time_structure.day;
-         day_.is_set = true;
-      } else if ( day_.is_set ) { // If the Day Date was already set, listen for the next they to reset it.
-         if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.date_key ) {
-            day_.reset();
-         }
+      if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) { 
+         day_.reset(); 
       }
       
       // Reset the Hour
-      if ( hour_.is_set && current_time_structure.hour != hour_.key ) { 
-         if (
-            hour_.is_big() &&
-            (
-               hour_.is_stable( "sell" ) ||
-               hour_.is_stable( "buy" )
-            )
-         ) {
-            day_.big_move_happaned = true;
-            day_.big_move_direction = hour_.is_stable( "sell" ) ? "sell" : ( hour_.is_stable( "buy" ) ? "buy" : "" );
-         }
-
+      if ( hour_.is_set && current_time_structure.hour != hour_.key ) {
          hour_.reset(); 
       }
       
@@ -382,6 +386,7 @@ void OnTick() {
                !hour_.is_big() &&
                trend_.rsi > 30 &&
                trend_.bulls_power < 0 &&
+               //!is_risky_deal( "sell" ) &&
                minute_.actual_price > trend_.risk_low_price &&
                minute_.opening_price - minute_.actual_price >= instrument_.opm      
             ) {                  
@@ -393,6 +398,7 @@ void OnTick() {
                !hour_.is_big() &&
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
+               //!is_risky_deal( "buy" ) &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.actual_price - minute_.opening_price >= instrument_.opm
             ) {                  
