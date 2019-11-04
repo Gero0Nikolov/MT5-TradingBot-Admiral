@@ -333,26 +333,20 @@ class ACCOUNT {
       }
    }
 
-   void ping() {
-      if ( this.ping_counter == 4 ) {
-         string cookie = NULL, headers;
-         char post[], result[];
-         string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
-         string data = "action=mt5_ping&api_key="+ api_key +"&broker="+ this.broker;
-         StringToCharArray( data, post );
-         string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+   void ping() {      
+      string cookie = NULL, headers;
+      char post[], result[];
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+      string data = "action=mt5_ping&api_key="+ api_key +"&broker="+ this.broker;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
 
-         ResetLastError();
+      ResetLastError();
 
-         int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-         if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
-
-         // Reset the Ping Counter
-         this.ping_counter = 0;
-      } else {
-         this.ping_counter += 1;
-      }
+      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+      else if ( res == 200 ) { /* SERVER WAS PINGED */ }
    }
 };
 
