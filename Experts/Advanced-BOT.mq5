@@ -12,6 +12,7 @@
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
 #include "../Include/Actions/IsRiskyDeal.mqh";
+#include "../Include/Actions/UpdateTradeLibrary.mqh";
 
 // Initialize Classes
 class HOUR {   
@@ -238,6 +239,8 @@ class POSITION {
    double price_difference;
    double difference_in_percentage;
    int ticket_id;
+   double rsi;
+   double bulls_power;
 
    POSITION() {
       this.id = 0;
@@ -249,6 +252,8 @@ class POSITION {
       this.price_difference = 0;
       this.difference_in_percentage = 0;
       this.ticket_id = 0;
+      this.rsi = 0;
+      this.bulls_power = 0;
    }
 
    void reset() {
@@ -261,6 +266,8 @@ class POSITION {
       this.price_difference = 0;
       this.difference_in_percentage = 0;
       this.ticket_id = 0;
+      this.rsi = 0;
+      this.bulls_power = 0;
    }
 };
 
@@ -350,6 +357,21 @@ class ACCOUNT {
    }
 };
 
+class TRADE_LIBRARY {
+   public:
+   bool success;
+   double rsi;
+   double bulls_power;
+   int type; // -1 = SELL; 1 = BUY;
+
+   TRADE_LIBRARY() {
+      this.success = false;
+      this.rsi = 0;
+      this.bulls_power = 0;
+      this.type = 0;
+   }
+};
+
 // Trading Objects
 CALENDAR calendar_( "US" );
 HOUR hour_;
@@ -359,6 +381,7 @@ INSTRUMENT_SETUP instrument_;
 TREND trend_;
 POSITION position_;
 ACCOUNT account_;
+TRADE_LIBRARY library_[];
 
 // MQL Defaults
 MqlTradeRequest order_request = {0};
@@ -380,7 +403,6 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
-   Print( "Yesterday Date: "+ day_.yesterday_date );
 
    return(INIT_SUCCEEDED);
 }
@@ -466,7 +488,7 @@ void OnTick() {
                !hour_.is_big() &&
                trend_.rsi > 30 &&
                trend_.bulls_power < 0 &&
-               //!is_risky_deal( "sell" ) &&
+               //!is_risky_deal( -1 ) &&
                minute_.actual_price > trend_.risk_low_price &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.opening_price - minute_.actual_price >= instrument_.opm      
@@ -479,7 +501,7 @@ void OnTick() {
                !hour_.is_big() &&
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
-               //!is_risky_deal( "buy" ) &&
+               //!is_risky_deal( 1 ) &&
                minute_.actual_price > trend_.risk_low_price &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.actual_price - minute_.opening_price >= instrument_.opm
@@ -508,12 +530,12 @@ void OnTick() {
                position_.price_difference = hour_.actual_price - position_.opening_price;
                position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
                
-               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "sell" ); }
+               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "sell", true ); }
             } else if ( position_.type == "buy" ) {
                position_.price_difference = position_.opening_price - hour_.actual_price ;
                position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
                
-               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "buy" ); }
+               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "buy", true ); }
             }
          }
       }   

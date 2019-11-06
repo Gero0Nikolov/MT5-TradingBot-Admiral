@@ -1,4 +1,4 @@
-void close_position( string type_ ) {
+void close_position( string type_, bool is_sl = false ) {
     ulong  position_ticket = PositionGetTicket( 0 );                                      // ticket of the position
     string position_symbol = PositionGetString( POSITION_SYMBOL) ;                        // symbol 
     int digits = (int)SymbolInfoInteger( position_symbol, SYMBOL_DIGITS );              // number of decimal places
@@ -19,7 +19,12 @@ void close_position( string type_ ) {
     if ( is_closed_order ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
-        position_.reset();
+
+        // Check if RSI & BullsPower of the Position were successful or not and add it to the library
+        update_trade_library( position_.rsi, position_.bulls_power, position_.type, is_sl );
+
+        // Reset Position
+        position_.reset();        
 
         // Suggest Withdraw
         account_.suggest_withdraw();
