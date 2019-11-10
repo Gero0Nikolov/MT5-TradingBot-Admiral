@@ -111,8 +111,10 @@ class DAY {
    double yesterday_highest;
    double yesterday_lowest;
    string yesterday_direction;
+   int q_key;
 
-   DAY() {
+   DAY() {      
+      // Reset Day
       this.reset();
    }
 
@@ -123,6 +125,7 @@ class DAY {
       
       this.key = time_structure.year + time_structure.mon + time_structure.day;
       this.set_yesterday_market_info();
+      this.q_key = calendar_.determine_q();
 
       // Get News for Today
       //calendar_.get_calendar_values( time, 1, "day" );
@@ -150,10 +153,113 @@ class CALENDAR {
    MqlCalendarValue values[];
    bool got_values;
    MqlCalendarValue risk_values[];
+   int year;
 
    CALENDAR( string alpha_2_code ) {
       this.country_code = alpha_2_code;
       this.got_values = false;
+      
+      // Set Ques
+      this.set_qs();
+   }
+
+   void set_qs() {
+      MqlDateTime time_structure;
+      datetime server_time = TimeTradeServer();
+      TimeToStruct( server_time, time_structure );
+
+      // Set the current year
+      this.year = time_structure.year;
+
+      // Set Qs for the year
+      for ( int count_qs = 0; count_qs < ArraySize( qs_ ); count_qs++ ) {
+         if ( count_qs == 0 ) { // Q1
+            // Set Start            
+            time_structure.mon = 1;
+            time_structure.day = 1;
+            time_structure.hour = 0;
+            time_structure.min = 0;
+            time_structure.sec = 0;
+            qs_[ count_qs ].start = StructToTime( time_structure );
+
+            // Set End
+            time_structure.mon = 3;
+            time_structure.day = 31;
+            time_structure.hour = 23;
+            time_structure.min = 59;
+            time_structure.sec = 59;
+            qs_[ count_qs ].end = StructToTime( time_structure );
+         } else if ( count_qs == 1 ) { // Q2
+            // Set Start            
+            time_structure.mon = 4;
+            time_structure.day = 1;
+            time_structure.hour = 0;
+            time_structure.min = 0;
+            time_structure.sec = 0;
+            qs_[ count_qs ].start = StructToTime( time_structure );
+
+            // Set End
+            time_structure.mon = 6;
+            time_structure.day = 30;
+            time_structure.hour = 23;
+            time_structure.min = 59;
+            time_structure.sec = 59;
+            qs_[ count_qs ].end = StructToTime( time_structure );
+         } else if ( count_qs == 2 ) { // Q3
+            // Set Start            
+            time_structure.mon = 7;
+            time_structure.day = 1;
+            time_structure.hour = 0;
+            time_structure.min = 0;
+            time_structure.sec = 0;
+            qs_[ count_qs ].start = StructToTime( time_structure );
+
+            // Set End
+            time_structure.mon = 9;
+            time_structure.day = 30;
+            time_structure.hour = 23;
+            time_structure.min = 59;
+            time_structure.sec = 59;
+            qs_[ count_qs ].end = StructToTime( time_structure );
+         } else if ( count_qs == 3 ) { // Q4
+            // Set Start
+            time_structure.mon = 10;
+            time_structure.day = 1;
+            time_structure.hour = 0;
+            time_structure.min = 0;
+            time_structure.sec = 0;
+            qs_[ count_qs ].start = StructToTime( time_structure );
+
+            // Set End
+            time_structure.mon = 12;
+            time_structure.day = 31;
+            time_structure.hour = 23;
+            time_structure.min = 59;
+            time_structure.sec = 59;
+            qs_[ count_qs ].end = StructToTime( time_structure );
+         }
+
+         Print( "Q: "+ count_qs );
+         Print( "Print Start: "+ qs_[ count_qs ].start );
+         Print( "Print End: "+ qs_[ count_qs ].end );
+      }
+   }
+
+   int determine_q() {
+      datetime current_time = TimeTradeServer();
+      int q_key = 0;
+      
+      for ( int count_qs = 0; count_qs < ArraySize( qs_ ); count_qs++ ) {
+         if ( 
+            current_time >= qs_[ count_qs ].start &&
+            current_time <= qs_[ count_qs ].end
+         ) {
+            q_key = count_qs;
+            break;
+         }
+      }
+
+      return q_key;
    }
 
    /*
@@ -190,6 +296,21 @@ class CALENDAR {
             count_risk_values += 1;
          }
       }
+   }
+};
+
+class Q_TYPE {
+   public:
+   datetime start;
+   datetime end;
+   double highest_price;
+   double lowest_price;
+
+   Q_TYPE() {
+      this.start = TimeCurrent();
+      this.end = TimeCurrent();      
+      this.highest_price = 0;
+      this.lowest_price = 0;
    }
 };
 
@@ -363,16 +484,19 @@ class TRADE_LIBRARY {
    double rsi;
    double bulls_power;
    int type; // -1 = SELL; 1 = BUY;
+   double price;
 
    TRADE_LIBRARY() {
       this.success = false;
       this.rsi = 0;
       this.bulls_power = 0;
       this.type = 0;
+      this.price = 0;
    }
 };
 
 // Trading Objects
+Q_TYPE qs_[ 4 ];
 CALENDAR calendar_( "US" );
 HOUR hour_;
 MINUTE minute_;
@@ -396,7 +520,11 @@ double bulls_power_buffer[];
 double bulls_power_handler;
 
 // Expert initialization function                                   |
-int OnInit(){   
+int OnInit(){
+   // Set the EA Timer with period of 1 second
+   EventSetTimer( 1 );
+
+   // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
    Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
@@ -408,7 +536,26 @@ int OnInit(){
 }
 
 // Expert deinitialization function                                 |
-void OnDeinit(const int reason) {
+void OnDeinit( const int reason ) {
+   // Destroy the EA Timer in order to clear RAM
+   EventKillTimer();
+}
+
+// Expert timer function
+void OnTimer() {
+   MqlDateTime current_time_structure;
+   datetime current_time = TimeTradeServer();
+   TimeToStruct( current_time, current_time_structure );
+
+   // Check the year and reset the Qs if needed
+   if ( current_time_structure.year > calendar_.year ) {
+      calendar_.set_qs();
+   }
+
+   // Reset the day if needed
+   if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) {
+      day_.reset();      
+   }
 }
 
 // Expert tick function                                             |
@@ -418,11 +565,7 @@ void OnTick() {
    if ( SymbolInfoTick( Symbol(), current_tick ) ) {
       MqlDateTime current_time_structure;
       datetime current_time = TimeTradeServer();
-      TimeToStruct( current_time, current_time_structure );
-      
-      if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) {
-         day_.reset();   
-      }
+      TimeToStruct( current_time, current_time_structure );      
       
       // Reset the Hour
       if ( hour_.is_set && current_time_structure.hour != hour_.key ) {
@@ -471,7 +614,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -481,14 +624,14 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      if ( !position_.is_opened ) {
+      if ( !position_.is_opened ) {         
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if (
+            if (               
                hour_.is_in_direction( "sell" ) &&
                !hour_.is_big() &&
                trend_.rsi > 30 &&
                trend_.bulls_power < 0 &&
-               //!is_risky_deal( -1 ) &&
+               !is_risky_deal( -1 ) &&
                minute_.actual_price > trend_.risk_low_price &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.opening_price - minute_.actual_price >= instrument_.opm      
@@ -496,12 +639,12 @@ void OnTick() {
                open_position( "sell", current_tick.bid );
             } 
          } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if (
+            if (               
                hour_.is_in_direction( "buy" ) &&
                !hour_.is_big() &&
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
-               //!is_risky_deal( 1 ) &&
+               !is_risky_deal( 1 ) &&
                minute_.actual_price > trend_.risk_low_price &&
                minute_.actual_price < trend_.risk_high_price &&
                minute_.actual_price - minute_.opening_price >= instrument_.opm
