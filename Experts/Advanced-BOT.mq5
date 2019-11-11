@@ -13,6 +13,7 @@
 #include "../Include/Actions/ClosePosition.mqh";
 #include "../Include/Actions/IsRiskyDeal.mqh";
 #include "../Include/Actions/UpdateTradeLibrary.mqh";
+#include "../Include/Actions/Library.mqh";
 
 // Initialize Classes
 class HOUR {   
@@ -239,9 +240,9 @@ class CALENDAR {
             qs_[ count_qs ].end = StructToTime( time_structure );
          }
 
-         Print( "Q: "+ count_qs );
-         Print( "Print Start: "+ qs_[ count_qs ].start );
-         Print( "Print End: "+ qs_[ count_qs ].end );
+         // Print( "Q: "+ count_qs );
+         // Print( "Print Start: "+ qs_[ count_qs ].start );
+         // Print( "Print End: "+ qs_[ count_qs ].end );
       }
    }
 
@@ -525,12 +526,15 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Print Account Info
-   Print( "Initial Deposit: "+ account_.initial_deposit );
-   Print( "Account Currency: "+ account_.currency );
-   Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
-   Print( "Trading Percent: "+ account_.trading_percent );
-   Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
-   Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+   // Print( "Initial Deposit: "+ account_.initial_deposit );
+   // Print( "Account Currency: "+ account_.currency );
+   // Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
+   // Print( "Trading Percent: "+ account_.trading_percent );
+   // Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
+   // Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+
+   // DEBUG   
+   read_library();
 
    return(INIT_SUCCEEDED);
 }
@@ -539,6 +543,9 @@ int OnInit(){
 void OnDeinit( const int reason ) {
    // Destroy the EA Timer in order to clear RAM
    EventKillTimer();
+
+   // DEBUG
+   store_to_library();
 }
 
 // Expert timer function
@@ -632,8 +639,8 @@ void OnTick() {
                trend_.rsi > 30 &&
                trend_.bulls_power < 0 &&
                !is_risky_deal( -1 ) &&
-               minute_.actual_price > trend_.risk_low_price &&
-               minute_.actual_price < trend_.risk_high_price &&
+               // minute_.actual_price > trend_.risk_low_price &&
+               // minute_.actual_price < trend_.risk_high_price &&
                minute_.opening_price - minute_.actual_price >= instrument_.opm      
             ) {                  
                open_position( "sell", current_tick.bid );
@@ -645,8 +652,8 @@ void OnTick() {
                trend_.rsi < 70 &&
                trend_.bulls_power > 0 &&
                !is_risky_deal( 1 ) &&
-               minute_.actual_price > trend_.risk_low_price &&
-               minute_.actual_price < trend_.risk_high_price &&
+               // minute_.actual_price > trend_.risk_low_price &&
+               // minute_.actual_price < trend_.risk_high_price &&
                minute_.actual_price - minute_.opening_price >= instrument_.opm
             ) {                  
                open_position( "buy", current_tick.ask );

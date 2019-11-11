@@ -25,12 +25,12 @@ int exists_in_library( double rsi, double bulls_power, int type, double price ) 
         ) {
             key = count_lib_elements;
 
-            Print( "Position: "+ key );
-            Print( "Success: "+ library_[ key ].success );
-            Print( "RSI: "+ library_[ key ].rsi );
-            Print( "BP: "+ library_[ key ].bulls_power );
-            Print( "Type: "+ library_[ key ].type );
-            Print( "Price: "+ library_[ key ].price );
+            // Print( "Position: "+ key );
+            // Print( "Success: "+ library_[ key ].success );
+            // Print( "RSI: "+ library_[ key ].rsi );
+            // Print( "BP: "+ library_[ key ].bulls_power );
+            // Print( "Type: "+ library_[ key ].type );
+            // Print( "Price: "+ library_[ key ].price );
 
             break;
         }
@@ -58,4 +58,34 @@ void add_to_library( double rsi, double bulls_power, int type, bool is_sl, doubl
 
 void update_element_in_library( int key, bool is_sl ) {    
     library_[ key ].success = !is_sl ? true : false;
+}
+
+void print_library() {
+    for ( int count_lib = 0; count_lib < ArraySize( library_ ); count_lib++ ) {
+        Print( "Key: "+ count_lib );        
+    }
+}
+
+void read_library() {
+    for ( int item = 0; item < ArraySize( old_library ); item++ ) {
+        string old_item[];
+        bool split_result = StringSplit( old_library[ item ], StringGetCharacter( ",", 0 ), old_item );
+
+        bool is_sl = old_item[ 0 ] == "true" ? false : true;        
+
+        add_to_library( old_item[ 1 ], old_item[ 2 ], old_item[ 3 ], is_sl, old_item[ 4 ] );      
+    }
+}
+
+void store_to_library() {   
+    Print( "Start Storing" );
+
+    Print( "#string old_library[] = {" );
+    for ( int item = 0; item < ArraySize( library_ ); item++ ) {
+        string element_ = library_[ item ].success +","+ library_[ item ].rsi +","+ library_[ item ].bulls_power +","+ library_[ item ].type +","+ library_[ item ].price;
+        Print( "#\""+ element_ +"\"," );
+    }
+    Print( "#};" );
+
+    Print( "End Storing" );
 }
