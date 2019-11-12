@@ -4,7 +4,7 @@ void update_trade_library( double rsi, double bulls_power, string type, double p
     
     if ( in_library > -1 ) { // Change the Success property if needed
         update_element_in_library( in_library, is_sl );
-    } else { // Add the Trade to the Library
+    } else { // Add the Trade to the Library        
         add_to_library( rsi, bulls_power, type_, is_sl, price );
     }   
 }
@@ -24,14 +24,6 @@ int exists_in_library( double rsi, double bulls_power, int type, double price ) 
             library_[ count_lib_elements ].price == price
         ) {
             key = count_lib_elements;
-
-            // Print( "Position: "+ key );
-            // Print( "Success: "+ library_[ key ].success );
-            // Print( "RSI: "+ library_[ key ].rsi );
-            // Print( "BP: "+ library_[ key ].bulls_power );
-            // Print( "Type: "+ library_[ key ].type );
-            // Print( "Price: "+ library_[ key ].price );
-
             break;
         }
     }
@@ -78,14 +70,15 @@ void read_library() {
 }
 
 void store_to_library() {   
-    Print( "Start Storing" );
+    int h = FileOpen( "Library.mqh", FILE_WRITE|FILE_ANSI|FILE_TXT|FILE_COMMON );
+    if( h == INVALID_HANDLE ) { Print( "Failed to write in Library.mqh" ); }
 
-    Print( "#string old_library[] = {" );
+    FileWrite( h, "string old_library[] = {" );    
     for ( int item = 0; item < ArraySize( library_ ); item++ ) {
         string element_ = library_[ item ].success +","+ library_[ item ].rsi +","+ library_[ item ].bulls_power +","+ library_[ item ].type +","+ library_[ item ].price;
-        Print( "#\""+ element_ +"\"," );
+        FileWrite( h, "\""+ element_ +"\"," );    
     }
-    Print( "#};" );
+    FileWrite( h, "};" );    
 
-    Print( "End Storing" );
+    FileClose( h );
 }
