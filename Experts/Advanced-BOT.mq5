@@ -471,6 +471,8 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
+      Print(res);
+
       if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
       else if ( res == 200 ) { /* SERVER WAS PINGED */ }
    }
@@ -533,6 +535,8 @@ int OnInit(){
    // DEBUG   
    read_library();
 
+   Print( "S+ Start: "+ ArraySize( library_ ) );
+
    return(INIT_SUCCEEDED);
 }
 
@@ -543,6 +547,8 @@ void OnDeinit( const int reason ) {
 
    // DEBUG
    store_to_library();
+
+   Print( "S+ End: "+ ArraySize( library_ ) );
 }
 
 // Expert timer function

@@ -59,26 +59,31 @@ void print_library() {
 }
 
 void read_library() {
-    for ( int item = 0; item < ArraySize( old_library ); item++ ) {
-        string old_item[];
-        bool split_result = StringSplit( old_library[ item ], StringGetCharacter( ",", 0 ), old_item );
+    int h = FileOpen( "Library.txt", FILE_ANSI|FILE_TXT|FILE_READ|FILE_COMMON );
+    if ( h != INVALID_HANDLE ) {        
+        string line;        
+        while ( !FileIsEnding( h ) ) {
+            line = FileReadString( h, -1 );            
+            
+            string old_item[];
+            bool split_result = StringSplit( line, StringGetCharacter( ",", 0 ), old_item );
 
-        bool is_sl = old_item[ 0 ] == "true" ? false : true;        
+            bool is_sl = old_item[ 0 ] == "true" ? false : true;        
 
-        add_to_library( old_item[ 1 ], old_item[ 2 ], old_item[ 3 ], is_sl, old_item[ 4 ] );      
-    }
+            add_to_library( old_item[ 1 ], old_item[ 2 ], old_item[ 3 ], is_sl, old_item[ 4 ] );     
+        }        
+        FileClose( h );        
+    }   
 }
 
 void store_to_library() {   
-    int h = FileOpen( "Library.mqh", FILE_WRITE|FILE_ANSI|FILE_TXT|FILE_COMMON );
+    int h = FileOpen( "Library.txt", FILE_WRITE|FILE_ANSI|FILE_TXT|FILE_COMMON );
     if( h == INVALID_HANDLE ) { Print( "Failed to write in Library.mqh" ); }
-
-    FileWrite( h, "string old_library[] = {" );    
+    
     for ( int item = 0; item < ArraySize( library_ ); item++ ) {
         string element_ = library_[ item ].success +","+ library_[ item ].rsi +","+ library_[ item ].bulls_power +","+ library_[ item ].type +","+ library_[ item ].price;
-        FileWrite( h, "\""+ element_ +"\"," );    
-    }
-    FileWrite( h, "};" );    
+        FileWrite( h, element_ );    
+    }    
 
     FileClose( h );
 }
