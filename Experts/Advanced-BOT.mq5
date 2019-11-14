@@ -471,8 +471,6 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      Print(res);
-
       if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
       else if ( res == 200 ) { /* SERVER WAS PINGED */ }
    }
@@ -535,8 +533,6 @@ int OnInit(){
    // DEBUG   
    read_library();
 
-   Print( "S+ Start: "+ ArraySize( library_ ) );
-
    return(INIT_SUCCEEDED);
 }
 
@@ -547,8 +543,6 @@ void OnDeinit( const int reason ) {
 
    // DEBUG
    store_to_library();
-
-   Print( "S+ End: "+ ArraySize( library_ ) );
 }
 
 // Expert timer function
@@ -591,7 +585,10 @@ void OnTick() {
          hour_.actual_price = current_tick.bid;
          hour_.buy_price = current_tick.ask;
          hour_.lowest_price = hour_.opening_price;
-         hour_.highest_price = hour_.opening_price;         
+         hour_.highest_price = hour_.opening_price;
+
+         // Store to the Library
+         store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
