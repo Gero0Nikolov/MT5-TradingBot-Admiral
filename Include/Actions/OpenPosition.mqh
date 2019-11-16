@@ -7,8 +7,8 @@ void open_position( string type, double price ) {
     int account_leverage = AccountInfoInteger( ACCOUNT_LEVERAGE );
     double volume = NormalizeDouble( ( free_margin * account_.trading_percent ) * account_leverage / price, 1 );
 
-    // Check if volume is above 100 and set the maximum for the Admiral Markets broker = 100
-    if ( volume > 100 ) { volume = 100; }
+    // Check if volume is above 500 and set the maximum for the Admiral Markets broker = 500
+    if ( volume > 500 ) { volume = 500; }
 
     // Calculate Stop Loss price
     double stop_loss = 0;

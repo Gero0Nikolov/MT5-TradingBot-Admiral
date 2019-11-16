@@ -22,8 +22,8 @@ int exists_in_library( double rsi, double bulls_power, int type, double price ) 
 
         if ( 
             rsi__ == rsi && 
-            bulls_power__ == bulls_power
-            //library_[ count_lib_elements ].type == type &&
+            bulls_power__ == bulls_power &&
+            library_[ count_lib_elements ].type == type
             //library_[ count_lib_elements ].price == price
         ) {
             key = count_lib_elements;

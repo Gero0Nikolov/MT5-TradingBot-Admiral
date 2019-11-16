@@ -22,16 +22,17 @@
 #include "../Include/Types/Account.mqh";
 #include "../Include/Types/TradeLibrary.mqh";
 
-// Include Functions
+// Include Functions, the so called Actions
 #include "../Include/Actions/VirtualTrader.mqh";
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
 #include "../Include/Actions/IsRiskyDeal.mqh";
 #include "../Include/Actions/UpdateTradeLibrary.mqh";
+#include "../Include/Actions/PositionCheckup.mqh";
 
 // Initialize Classes - Trading Objects
-VIRTUAL_TRADER virtual_trader;
-VIRTUAL_POSITION virtual_position[];
+VIRTUAL_TRADER vt_;
+VIRTUAL_POSITION vp_[];
 Q_TYPE qs_[ 4 ];
 CALENDAR calendar_( "US" );
 HOUR hour_;
@@ -159,7 +160,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -169,31 +170,13 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      if ( !position_.is_opened ) {         
+      if ( !position_.is_opened ) {  
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if (               
-               hour_.is_in_direction( "sell" ) &&
-               !hour_.is_big() &&
-               trend_.rsi > 30 &&
-               trend_.bulls_power < 0 &&
-               !is_risky_deal( -1 ) &&
-               // minute_.actual_price > trend_.risk_low_price &&
-               // minute_.actual_price < trend_.risk_high_price &&
-               minute_.opening_price - minute_.actual_price >= instrument_.opm      
-            ) {                  
+            if ( should_open( -1 ) ) {                  
                open_position( "sell", current_tick.bid );
-            } 
+            }
          } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if (               
-               hour_.is_in_direction( "buy" ) &&
-               !hour_.is_big() &&
-               trend_.rsi < 70 &&
-               trend_.bulls_power > 0 &&
-               !is_risky_deal( 1 ) &&
-               // minute_.actual_price > trend_.risk_low_price &&
-               // minute_.actual_price < trend_.risk_high_price &&
-               minute_.actual_price - minute_.opening_price >= instrument_.opm
-            ) {                  
+            if ( should_open( 1 ) ) {                  
                open_position( "buy", current_tick.ask );
             }
          }
@@ -226,6 +209,22 @@ void OnTick() {
                if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "buy", true ); }
             }
          }
-      }   
+      }
+
+      // Virtual Mode
+      if ( position_.is_opened ) { // Create new Virtual Positions only if there are already OPENED positions
+         if ( minute_.opening_price > minute_.actual_price ) { // Sell
+            if ( should_open( -1 ) ) {
+               vt_.open_virtual_position( -1, current_tick.bid );
+            }
+         } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
+            if ( should_open( 1 ) ) {               
+               vt_.open_virtual_position( 1, current_tick.ask );
+            }
+         }
+      }
+
+      // Make inspection of the current price and the Virtual Positions
+      vt_.check_virtual_positions();
    }
 }
