@@ -14,7 +14,7 @@ int exists_in_library( double rsi, double bulls_power, int type, double price ) 
 
     rsi = NormalizeDouble( rsi, 10 );
     bulls_power = NormalizeDouble( bulls_power, 10 );
-    price = NormalizeDouble( price, 0 );
+    //price = NormalizeDouble( price, 0 );
 
     for ( int count_lib_elements = 0; count_lib_elements < ArraySize( library_ ); count_lib_elements++ ) {
         double rsi__ = NormalizeDouble( library_[ count_lib_elements ].rsi, 10 );
@@ -39,11 +39,7 @@ void add_to_library( double rsi, double bulls_power, int type, bool is_sl, doubl
     int new_size = ArraySize( library_ ) + 1;
 
     ArrayResize( library_, new_size );
-
-    rsi = NormalizeDouble( rsi, 10 );
-    bulls_power = NormalizeDouble( bulls_power, 10 );
-    price = NormalizeDouble( price, 0 );
-
+    
     library_[ key ].success = !is_sl ? true : false;
     library_[ key ].rsi = rsi;
     library_[ key ].bulls_power = bulls_power;
