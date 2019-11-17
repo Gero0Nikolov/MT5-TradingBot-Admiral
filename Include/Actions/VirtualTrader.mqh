@@ -25,9 +25,9 @@ class VIRTUAL_TRADER {
         double tp_price = 0;
 
         if ( type == "sell" ) {
-            tp_price = opening_price - ( instrument_.tpm * opening_price );
+            tp_price = opening_price - ( instrument_.tpm / 100 * opening_price );
         } else if ( type == "buy" ) {
-            tp_price = opening_price + ( instrument_.tpm * opening_price );
+            tp_price = opening_price + ( instrument_.tpm / 100 * opening_price );
         }
 
         return tp_price;
@@ -37,9 +37,9 @@ class VIRTUAL_TRADER {
         double sl_price = 0;
 
         if ( type == "sell" ) {
-            sl_price = opening_price + ( instrument_.slm * opening_price );
+            sl_price = opening_price + ( instrument_.slm / 100 * opening_price );
         } else if ( type == "buy" ) {
-            sl_price = opening_price + ( instrument_.slm * opening_price );
+            sl_price = opening_price + ( instrument_.slm / 100 * opening_price );
         }
 
         return sl_price;
@@ -110,6 +110,7 @@ class VIRTUAL_TRADER {
         }
 
         // Clear the old Virtual Positions
+        ArrayFree( vp_ );
         ZeroMemory( vp_ );
 
         // Put the Virtual Positions Copy in the actual Virtual Positions
@@ -131,6 +132,7 @@ class VIRTUAL_TRADER {
         }
 
         // Clear the Virtual Positions Copy
+        ArrayFree( vp_cpy );
         ZeroMemory( vp_cpy );
     }
 };

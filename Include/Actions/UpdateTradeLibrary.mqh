@@ -12,13 +12,16 @@ void update_trade_library( double rsi, double bulls_power, string type, double p
 int exists_in_library( double rsi, double bulls_power, int type, double price ) {
     int key = -1;
 
-    rsi = NormalizeDouble( rsi, 10 );
-    bulls_power = NormalizeDouble( bulls_power, 10 );
+    rsi = NormalizeDouble( rsi, 2 );
+    bulls_power = NormalizeDouble( bulls_power, 2 );
     //price = NormalizeDouble( price, 0 );
 
     for ( int count_lib_elements = 0; count_lib_elements < ArraySize( library_ ); count_lib_elements++ ) {
-        double rsi__ = NormalizeDouble( library_[ count_lib_elements ].rsi, 10 );
-        double bulls_power__ = NormalizeDouble( library_[ count_lib_elements ].bulls_power, 10 );
+        double rsi__ = NormalizeDouble( library_[ count_lib_elements ].rsi, 2 );
+        double bulls_power__ = NormalizeDouble( library_[ count_lib_elements ].bulls_power, 2 );
+
+        // double rsi__ = library_[ count_lib_elements ].rsi;
+        // double bulls_power__ = library_[ count_lib_elements ].bulls_power;
 
         if ( 
             rsi__ == rsi && 
@@ -70,19 +73,22 @@ void read_library() {
             bool is_sl = old_item[ 0 ] == "true" ? false : true;        
 
             add_to_library( old_item[ 1 ], old_item[ 2 ], old_item[ 3 ], is_sl, old_item[ 4 ] );     
-        }        
-        FileClose( h );        
-    }   
+        }                     
+    } else {
+        Print( "Failed to read from Library.txt" );
+    }
+    FileClose( h );
 }
 
 void store_to_library() {   
     int h = FileOpen( "Library.txt", FILE_WRITE|FILE_ANSI|FILE_TXT|FILE_COMMON );
-    if( h == INVALID_HANDLE ) { Print( "Failed to write in Library.mqh" ); }
-    
-    for ( int item = 0; item < ArraySize( library_ ); item++ ) {
-        string element_ = library_[ item ].success +","+ library_[ item ].rsi +","+ library_[ item ].bulls_power +","+ library_[ item ].type +","+ library_[ item ].price;
-        FileWrite( h, element_ );    
-    }    
-
+    if( h != INVALID_HANDLE ) {
+        for ( int item = 0; item < ArraySize( library_ ); item++ ) {
+            string element_ = library_[ item ].success +","+ library_[ item ].rsi +","+ library_[ item ].bulls_power +","+ library_[ item ].type +","+ library_[ item ].price;
+            FileWrite( h, element_ );    
+        }
+    } else {
+        Print( "Failed to write in Library.txt" );
+    }
     FileClose( h );
 }

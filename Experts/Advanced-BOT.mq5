@@ -69,7 +69,7 @@ int OnInit(){
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );   
 
-   // DEBUG   
+   // Read the Library
    read_library();
 
    return(INIT_SUCCEEDED);
@@ -80,8 +80,8 @@ void OnDeinit( const int reason ) {
    // Destroy the EA Timer in order to clear RAM
    EventKillTimer();
 
-   // DEBUG
-   store_to_library();
+   // Store to the Library
+   store_to_library(); 
 }
 
 // Expert timer function
@@ -125,9 +125,6 @@ void OnTick() {
          hour_.buy_price = current_tick.ask;
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
-
-         // Store to the Library
-         store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -215,11 +212,11 @@ void OnTick() {
       if ( position_.is_opened ) { // Create new Virtual Positions only if there are already OPENED positions
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
             if ( should_open( -1 ) ) {
-               vt_.open_virtual_position( -1, current_tick.bid );
+               vt_.open_virtual_position( "sell", current_tick.bid );
             }
          } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
             if ( should_open( 1 ) ) {               
-               vt_.open_virtual_position( 1, current_tick.ask );
+               vt_.open_virtual_position( "buy", current_tick.ask );
             }
          }
       }
