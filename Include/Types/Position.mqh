@@ -12,6 +12,7 @@ class POSITION {
    int ticket_id;
    double rsi;
    double bulls_power;
+   TPL tpl_[];
 
    POSITION() {
       this.id = 0;
@@ -39,5 +40,12 @@ class POSITION {
       this.ticket_id = 0;
       this.rsi = 0;
       this.bulls_power = 0;
+
+      ArrayFree( this.tpl_ );
+      ZeroMemory( this.tpl_ );
+   }
+
+   void set_tpl() {
+      // TODO: Calculate TPLs
    }
 };

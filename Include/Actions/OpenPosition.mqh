@@ -50,5 +50,6 @@ void open_position( string type, double price ) {
         position_.ticket_id = PositionGetTicket( 0 );
         position_.rsi = trend_.rsi;
         position_.bulls_power = trend_.bulls_power;
+        position_.set_tpl();
     }
 }

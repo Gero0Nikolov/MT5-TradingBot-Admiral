@@ -18,6 +18,7 @@
 #include "../Include/Types/QType.mqh";
 #include "../Include/Types/InstrumentSetup.mqh";
 #include "../Include/Types/Trend.mqh";
+#include "../Include/Types/TPL.mqh";
 #include "../Include/Types/Position.mqh";
 #include "../Include/Types/Account.mqh";
 #include "../Include/Types/TradeLibrary.mqh";
