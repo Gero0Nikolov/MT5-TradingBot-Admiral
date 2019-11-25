@@ -8,10 +8,12 @@ class TPL {
     int level; // The price difference in % from the INSTRUMENT_SETUP.TPM;
     double price; // The actual price calculated with the % from the INSTRUMENT_SETUP.TPM;
     double difference; // The price difference in money;
+    bool is_passed;
 
     TPL() {
         this.level = 0;
         this.price = 0;
         this.difference = 0;
+        this.is_passed = false;
     }
 };

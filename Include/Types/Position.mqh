@@ -12,7 +12,9 @@ class POSITION {
    int ticket_id;
    double rsi;
    double bulls_power;
-   TPL tpl_[];
+   TPL tpl_[]; // Take Profit Levels
+   double tpp; // Take Profit Price
+   int tpl; // Take Profit Level
 
    POSITION() {
       this.id = 0;
@@ -26,6 +28,8 @@ class POSITION {
       this.ticket_id = 0;
       this.rsi = 0;
       this.bulls_power = 0;
+      this.tpp = 0;
+      this.tpl = 100;
    }
 
    void reset() {
@@ -40,12 +44,56 @@ class POSITION {
       this.ticket_id = 0;
       this.rsi = 0;
       this.bulls_power = 0;
+      this.tpp = 0;
+      this.tpl = 100;
 
       ArrayFree( this.tpl_ );
       ZeroMemory( this.tpl_ );
    }
 
-   void set_tpl() {
-      // TODO: Calculate TPLs
+   void set_tpl( int percentage_steps = 10 ) {
+      double total_tpm = (instrument_.tpm / 100) * this.opening_price;
+
+      for ( int count_step = 0; count_step <= 100; count_step += percentage_steps ) {
+         int key = ArraySize( this.tpl_ );
+         int new_size = ArraySize( this.tpl_ ) + 1;
+
+         ArrayResize( this.tpl_, new_size );
+
+         double step_tpm = (count_step / 100.0) * total_tpm;         
+
+         this.tpl_[ key ].level = count_step;
+         this.tpl_[ key ].price = this.type == "buy" ? this.opening_price + step_tpm : this.opening_price - step_tpm;
+         this.tpl_[ key ].difference = step_tpm;
+         this.tpl_[ key ].is_passed = false;
+         
+         // Set position initial TP
+         if ( count_step == 100 ) { this.tpp = this.tpl_[ key ].price; }
+      }
+   }
+
+   void check_tpl() {
+      int count_tpl = ArraySize( this.tpl_ );
+      
+      // Count should start from 1 because level 0 is without a Profit lol
+      for ( int count_step = 1; count_step < count_tpl; count_step++ ) {
+         if (            
+            ( 
+               this.type == "buy" && 
+               !this.tpl_[ count_step ].is_passed &&
+               minute_.actual_price >= this.tpl_[ count_step ].price
+            ) ||
+            (
+               this.type == "sell" &&
+               !this.tpl_[ count_step ].is_passed &&
+               minute_.actual_price <= this.tpl_[ count_step ].price
+            )
+         ) {
+            this.tpp = this.tpl_[ count_step ].price;
+            this.tpl_[ count_step ].is_passed = true;
+            this.tpl = this.tpl_[ count_step ].level;
+            break;
+         }
+      }      
    }
 };

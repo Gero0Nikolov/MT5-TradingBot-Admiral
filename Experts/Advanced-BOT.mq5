@@ -170,6 +170,9 @@ void OnTick() {
          minute_.highest_price = hour_.highest_price < hour_.actual_price ? hour_.actual_price : hour_.highest_price;
       }
 
+      // Check where the price stands
+      // position_.check_tpl();
+
       // Slicing Time if there is no opened position
       if ( !position_.is_opened ) {  
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
@@ -186,6 +189,36 @@ void OnTick() {
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
          if ( position_.profit > 10 ) { // Take Profit Listener
+            // NEW TP Logic (NOT USED)
+            // if ( position_.tpl == 100 ) { // Normal Take Profit Execution
+            //    if ( 
+            //       position_.type == "sell" &&
+            //       minute_.actual_price <= position_.tpp
+            //    ) { 
+            //       close_position( "sell" ); 
+            //    } else if ( 
+            //       position_.type == "buy" &&
+            //       minute_.actual_price >= position_.tpp
+            //    ) { 
+            //       close_position( "buy" ); 
+            //    }
+            // } else { // TPL is not 100
+            //    if ( 
+            //       position_.type == "sell" &&
+            //       minute_.actual_price >= position_.tpp
+            //    ) {
+            //       Print( "TPL Sell TP Level: "+ position_.tpl );
+            //       close_position( "sell" );
+            //    } else if (
+            //       position_.type == "buy" &&
+            //       minute_.actual_price <= position_.tpp
+            //    ) {
+            //       Print( "TPL Buy TP Level: "+ position_.tpl );
+            //       close_position( "buy" );
+            //    }
+            // }
+            
+            // OLD TPM Logic
             if ( position_.type == "sell" ) {
                position_.price_difference = position_.opening_price - hour_.actual_price;
                position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
