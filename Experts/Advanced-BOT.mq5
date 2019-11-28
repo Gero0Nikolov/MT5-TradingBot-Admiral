@@ -128,7 +128,7 @@ void OnTick() {
          hour_.highest_price = hour_.opening_price;
 
          // Store to the Library
-         store_to_library(); 
+         //store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -161,7 +161,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -169,9 +169,6 @@ void OnTick() {
          minute_.lowest_price = hour_.lowest_price > hour_.actual_price ? hour_.actual_price : hour_.lowest_price;
          minute_.highest_price = hour_.highest_price < hour_.actual_price ? hour_.actual_price : hour_.highest_price;
       }
-
-      // Check where the price stands
-      // position_.check_tpl();
 
       // Slicing Time if there is no opened position
       if ( !position_.is_opened ) {  
@@ -188,47 +185,21 @@ void OnTick() {
          position_.select = PositionSelectByTicket( position_.ticket_id );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
-         if ( position_.profit > 10 ) { // Take Profit Listener
-            // NEW TP Logic (NOT USED)
-            // if ( position_.tpl == 100 ) { // Normal Take Profit Execution
-            //    if ( 
-            //       position_.type == "sell" &&
-            //       minute_.actual_price <= position_.tpp
-            //    ) { 
-            //       close_position( "sell" ); 
-            //    } else if ( 
-            //       position_.type == "buy" &&
-            //       minute_.actual_price >= position_.tpp
-            //    ) { 
-            //       close_position( "buy" ); 
-            //    }
-            // } else { // TPL is not 100
-            //    if ( 
-            //       position_.type == "sell" &&
-            //       minute_.actual_price >= position_.tpp
-            //    ) {
-            //       Print( "TPL Sell TP Level: "+ position_.tpl );
-            //       close_position( "sell" );
-            //    } else if (
-            //       position_.type == "buy" &&
-            //       minute_.actual_price <= position_.tpp
-            //    ) {
-            //       Print( "TPL Buy TP Level: "+ position_.tpl );
-            //       close_position( "buy" );
-            //    }
-            // }
-            
-            // OLD TPM Logic
+         if ( position_.profit > instrument_.tp_listener ) { // Take Profit Listener
             if ( position_.type == "sell" ) {
-               position_.price_difference = position_.opening_price - hour_.actual_price;
-               position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
-               
-               if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "sell" ); }
+               position_.price_difference = hour_.actual_price - hour_.opening_price;
+
+               if ( position_.price_difference > 0 ) {
+                  position_.difference_in_percentage = ( position_.price_difference / hour_.opening_price ) * 100;
+                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "sell" ); }
+               }
             } else if ( position_.type == "buy" ) {
-               position_.price_difference = hour_.actual_price - position_.opening_price;
-               position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
-               
-               if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "buy" ); }
+               position_.price_difference = hour_.opening_price - hour_.actual_price;
+
+               if ( position_.price_difference > 0 ) {
+                  position_.difference_in_percentage = ( position_.price_difference / hour_.opening_price ) * 100;
+                  if ( position_.difference_in_percentage >= 0.1 ) { close_position( "buy" ); }
+               }
             }
          } else if ( position_.profit <= 0 ) { // Stop Loss Listener
             if ( position_.type == "sell" ) {
