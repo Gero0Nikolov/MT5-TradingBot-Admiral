@@ -128,7 +128,7 @@ void OnTick() {
          hour_.highest_price = hour_.opening_price;
 
          // Store to the Library
-         //store_to_library(); 
+         store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -161,7 +161,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         //account_.ping();
+         account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
