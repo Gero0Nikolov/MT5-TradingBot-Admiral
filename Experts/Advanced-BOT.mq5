@@ -62,6 +62,9 @@ int OnInit(){
    // Set the EA Timer with period of 1 second
    EventSetTimer( 1 );
 
+   // Read the Library
+   read_library();
+
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
@@ -69,9 +72,7 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
-
-   // Read the Library
-   read_library();
+   Print( "Library size: "+ ArraySize( library_ ) );
 
    return(INIT_SUCCEEDED);
 }
