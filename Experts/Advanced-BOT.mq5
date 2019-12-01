@@ -68,7 +68,7 @@ int OnInit(){
    Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
-   Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );   
+   Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
 
    // Read the Library
    read_library();
@@ -219,11 +219,11 @@ void OnTick() {
       // Virtual Mode
       if ( position_.is_opened ) { // Create new Virtual Positions only if there are already OPENED positions
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if ( should_open( -1 ) ) {
+            if ( should_open_virtual_positions( -1 ) ) {
                vt_.open_virtual_position( "sell", current_tick.bid );
             }
          } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if ( should_open( 1 ) ) {               
+            if ( should_open_virtual_positions( 1 ) ) {               
                vt_.open_virtual_position( "buy", current_tick.ask );
             }
          }

@@ -41,6 +41,38 @@ class ACCOUNT {
       }
    }
 
+   void open_position_notification( string type, double price, double volume ) {
+      string cookie = NULL, headers;
+      char post[], result[];
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+      string data = "action=mt5_opn&api_key="+ api_key +"&type="+ type +"&price="+ price +"&volume="+ volume;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+
+      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+      else if ( res == 200 ) { /* NOTIFICATION WAS SENT! */ }
+   }
+
+   void closed_position_notification( bool is_sl ) {
+      string cookie = NULL, headers;
+      char post[], result[];
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+      string data = "action=mt5_cpn&api_key="+ api_key +"&is_sl="+ is_sl;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+
+      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+      else if ( res == 200 ) { /* NOTIFICATION WAS SENT! */ }
+   }
+
    void suggest_withdraw() {
       double free_margin = AccountInfoDouble( ACCOUNT_FREEMARGIN );
       double difference_between_id_fm = free_margin - this.initial_deposit;

@@ -51,5 +51,8 @@ void open_position( string type, double price ) {
         position_.rsi = trend_.rsi;
         position_.bulls_power = trend_.bulls_power;
         position_.set_tpl();
+
+        // Send Open Position Notification
+        account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
     }
 }
