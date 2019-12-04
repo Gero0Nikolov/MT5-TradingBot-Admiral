@@ -30,6 +30,6 @@ void close_position( string type_, bool is_sl = false ) {
         position_.reset();        
 
         // Suggest Withdraw
-        account_.suggest_withdraw();
+        //account_.suggest_withdraw();
     }
 }

@@ -8,6 +8,8 @@ class VIRTUAL_POSITION {
     double sl_price; // Calculated upon opening based on the Opening Price and the Instrument Setup SLM %
     bool is_opened; // Status of the VP; If it's FALSE the position was closed, if it's TRUE then the VP is still on the run
     bool success; // If the success flag is TRUE then the position was closed by the TP, else if it's FALSE then the position was closed by SL
+    double lowest_price;
+    double highest_price;
 
     VIRTUAL_POSITION() {
         this.type = "";
@@ -18,5 +20,7 @@ class VIRTUAL_POSITION {
         this.sl_price = 0;
         this.is_opened = false;
         this.success = false;
+        this.lowest_price = 0;
+        this.highest_price = 0;
     }    
 }

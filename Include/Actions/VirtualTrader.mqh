@@ -19,6 +19,8 @@ class VIRTUAL_TRADER {
         vp_[ key ].tp_price = this.calculate_tp_price( type, opening_price );
         vp_[ key ].sl_price = this.calculate_sl_price( type, opening_price );
         vp_[ key ].is_opened = true;
+        vp_[ key ].lowest_price = vp_[ key ].opening_price;
+        vp_[ key ].highest_price = vp_[ key ].opening_price;
     }
 
     double calculate_tp_price( string type, double opening_price ) {
@@ -53,15 +55,20 @@ class VIRTUAL_TRADER {
         if ( ArraySize( vp_ ) > 0 ) {
             int vp_size = ArraySize( vp_ );
             for ( int count_position = 0; count_position < vp_size; count_position++ ) {
+                // Update Position Lowest & Highest Prices
+                vp_[ count_position ].lowest_price = hour_.actual_price < vp_[ count_position ].lowest_price ? hour_.actual_price : vp_[ count_position ].lowest_price;
+                vp_[ count_position ].highest_price = hour_.actual_price > vp_[ count_position ].highest_price ? hour_.actual_price : vp_[ count_position ].highest_price;
+
+                // Set Listeners
                 if ( vp_[ count_position ].type == "sell" ) {                    
                     if ( 
                         vp_[ count_position ].opening_price > hour_.actual_price &&
                         vp_[ count_position ].opening_price - hour_.actual_price > instrument_.tp_listener
                     ) { // TP Listener
-                        double price_difference = hour_.actual_price - hour_.opening_price;
+                        double price_difference = hour_.actual_price - vp_[ count_position ].lowest_price;
 
                         if ( price_difference > 0 ) {
-                            double difference_in_percentage = ( price_difference / hour_.opening_price ) * 100;
+                            double difference_in_percentage = ( price_difference / ( ( hour_.actual_price + vp_[ count_position ].lowest_price ) / 2 ) ) * 100;
                             if ( difference_in_percentage >= instrument_.tpm ) { this.close_virtual_position( count_position, false ); }
                         }
                     } else if ( 
@@ -75,11 +82,11 @@ class VIRTUAL_TRADER {
                         vp_[ count_position ].opening_price < hour_.actual_price &&
                         hour_.actual_price - vp_[ count_position ].opening_price > instrument_.tp_listener
                     ) { // TP Listener
-                        double price_difference = hour_.opening_price - hour_.actual_price;
+                        double price_difference = vp_[ count_position ].highest_price - hour_.actual_price;
 
                         if ( price_difference > 0 ) {
-                            double difference_in_percentage = ( price_difference / hour_.opening_price ) * 100;
-                            if ( difference_in_percentage >= 0.1 ) { this.close_virtual_position( count_position, false ); }
+                            double difference_in_percentage = ( price_difference / ( ( vp_[ count_position ].highest_price + hour_.actual_price ) / 2 ) ) * 100;
+                            if ( difference_in_percentage >= instrument_.tpm ) { this.close_virtual_position( count_position, false ); }
                         }
                     } else if (
                         vp_[ count_position ].opening_price > hour_.actual_price &&

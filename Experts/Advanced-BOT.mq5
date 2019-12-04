@@ -186,20 +186,25 @@ void OnTick() {
          position_.select = PositionSelectByTicket( position_.ticket_id );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
+         // Update Position Lowest & Highest Price
+         position_.lowest_price = hour_.actual_price < position_.lowest_price ? hour_.actual_price : position_.lowest_price;
+         position_.highest_price = hour_.actual_price > position_.highest_price ? hour_.actual_price : position_.highest_price;
+
+         // Set Listeners
          if ( position_.profit > instrument_.tp_listener ) { // Take Profit Listener
             if ( position_.type == "sell" ) {
-               position_.price_difference = hour_.actual_price - hour_.opening_price;
+               position_.price_difference = hour_.actual_price - position_.lowest_price;
 
                if ( position_.price_difference > 0 ) {
-                  position_.difference_in_percentage = ( position_.price_difference / hour_.opening_price ) * 100;
+                  position_.difference_in_percentage = ( position_.price_difference / ( ( hour_.actual_price + position_.lowest_price ) / 2 ) ) * 100;
                   if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "sell" ); }
                }
             } else if ( position_.type == "buy" ) {
-               position_.price_difference = hour_.opening_price - hour_.actual_price;
+               position_.price_difference = position_.highest_price - hour_.actual_price;
 
                if ( position_.price_difference > 0 ) {
-                  position_.difference_in_percentage = ( position_.price_difference / hour_.opening_price ) * 100;
-                  if ( position_.difference_in_percentage >= 0.1 ) { close_position( "buy" ); }
+                  position_.difference_in_percentage = ( position_.price_difference / ( ( position_.highest_price + hour_.actual_price ) / 2 ) ) * 100;
+                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "buy" ); }
                }
             }
          } else if ( position_.profit <= 0 ) { // Stop Loss Listener

@@ -50,6 +50,8 @@ void open_position( string type, double price ) {
         position_.ticket_id = PositionGetTicket( 0 );
         position_.rsi = trend_.rsi;
         position_.bulls_power = trend_.bulls_power;
+        position_.lowest_price = position_.opening_price;
+        position_.highest_price = position_.opening_price;
         position_.set_tpl();
 
         // Send Open Position Notification

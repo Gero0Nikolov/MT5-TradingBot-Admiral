@@ -9,8 +9,8 @@ class INSTRUMENT_SETUP {
    INSTRUMENT_SETUP() {
       this.name = "NQ100";
       this.opm = 10;
-      this.tpm = 0.1;
+      this.tpm = 0.23;
       this.slm = 1;
-      this.tp_listener = 10;   
+      this.tp_listener = 10;
    }
 };
