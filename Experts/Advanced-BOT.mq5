@@ -30,6 +30,7 @@
 #include "../Include/Actions/IsRiskyDeal.mqh";
 #include "../Include/Actions/UpdateTradeLibrary.mqh";
 #include "../Include/Actions/PositionCheckup.mqh";
+#include "../Include/Actions/IsFridayEnding.mqh";
 
 // Initialize Classes - Trading Objects
 VIRTUAL_TRADER vt_;

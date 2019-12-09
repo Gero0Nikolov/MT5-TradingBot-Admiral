@@ -8,6 +8,7 @@ bool should_open( int type ) {
             trend_.rsi > 30 &&
             trend_.bulls_power < 0 &&
             !is_risky_deal( -1 ) &&
+            !is_friday_ending() &&
             // minute_.actual_price > trend_.risk_low_price &&
             // minute_.actual_price < trend_.risk_high_price &&
             minute_.opening_price - minute_.actual_price >= instrument_.opm
@@ -19,6 +20,7 @@ bool should_open( int type ) {
             trend_.rsi < 70 &&
             trend_.bulls_power > 0 &&
             !is_risky_deal( 1 ) &&
+            !is_friday_ending() &&
             // minute_.actual_price > trend_.risk_low_price &&
             // minute_.actual_price < trend_.risk_high_price &&
             minute_.actual_price - minute_.opening_price >= instrument_.opm
@@ -38,6 +40,7 @@ bool should_open_virtual_positions( int type ) {
             trend_.rsi > 30 &&
             trend_.bulls_power < 0 &&
             !in_library( -1 ) &&
+            !is_friday_ending() &&
             // minute_.actual_price > trend_.risk_low_price &&
             // minute_.actual_price < trend_.risk_high_price &&
             minute_.opening_price - minute_.actual_price >= instrument_.opm
@@ -49,6 +52,7 @@ bool should_open_virtual_positions( int type ) {
             trend_.rsi < 70 &&
             trend_.bulls_power > 0 &&
             !in_library( 1 ) &&
+            !is_friday_ending() &&
             // minute_.actual_price > trend_.risk_low_price &&
             // minute_.actual_price < trend_.risk_high_price &&
             minute_.actual_price - minute_.opening_price >= instrument_.opm
