@@ -27,9 +27,6 @@ void close_position( string type_, bool is_sl = false ) {
         account_.closed_position_notification( is_sl );
 
         // Reset Position
-        position_.reset();        
-
-        // Suggest Withdraw
-        //account_.suggest_withdraw();
+        position_.reset();
     }
 }

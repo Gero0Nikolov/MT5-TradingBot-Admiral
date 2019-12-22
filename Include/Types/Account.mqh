@@ -58,10 +58,14 @@ class ACCOUNT {
    }
 
    void closed_position_notification( bool is_sl ) {
+      // Info Data
+      string position_info = position_.is_opened ? "&position_profit="+ position_.profit : "";
+
+      // Request Structure
       string cookie = NULL, headers;
       char post[], result[];
       string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
-      string data = "action=mt5_cpn&api_key="+ api_key +"&is_sl="+ is_sl;
+      string data = "action=mt5_cpn&api_key="+ api_key +"&is_sl="+ is_sl + position_info;
       StringToCharArray( data, post );
       string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
 
@@ -99,11 +103,16 @@ class ACCOUNT {
       }
    }
 
-   void ping() {      
-      string cookie = NULL, headers;
-      char post[], result[];
+   void ping() {
+      // Info Data
+      double balance = AccountInfoDouble( ACCOUNT_BALANCE );
+      string position_info = position_.is_opened ? "&position_profit="+ position_.profit : "";
       string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
-      string data = "action=mt5_ping&api_key="+ api_key +"&broker="+ this.broker;
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_ping&api_key="+ api_key +"&broker="+ this.broker +"&balance="+ balance + position_info;
       StringToCharArray( data, post );
       string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
 
