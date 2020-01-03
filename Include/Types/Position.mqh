@@ -3,13 +3,12 @@ class POSITION {
    int id;
    string type;
    double opening_price;
-   int volume;
+   double volume;
    bool is_opened;
    double profit;
    bool select;
    double price_difference;
    double difference_in_percentage;
-   int ticket_id;
    double rsi;
    double bulls_power;
    TPL tpl_[]; // Take Profit Levels
@@ -27,7 +26,6 @@ class POSITION {
       this.select = false;
       this.price_difference = 0;
       this.difference_in_percentage = 0;
-      this.ticket_id = 0;
       this.rsi = 0;
       this.bulls_power = 0;
       this.tpp = 0;
@@ -45,7 +43,6 @@ class POSITION {
       this.select = false;
       this.price_difference = 0;
       this.difference_in_percentage = 0;
-      this.ticket_id = 0;
       this.rsi = 0;
       this.bulls_power = 0;
       this.tpp = 0;

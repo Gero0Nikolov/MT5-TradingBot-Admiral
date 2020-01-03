@@ -42,10 +42,14 @@ class ACCOUNT {
    }
 
    void open_position_notification( string type, double price, double volume ) {
+      // Info Data
+      double balance = AccountInfoDouble( ACCOUNT_BALANCE );
+      string position_info = position_.is_opened ? "&account_balance="+ balance : "";
+
       string cookie = NULL, headers;
       char post[], result[];
       string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
-      string data = "action=mt5_opn&api_key="+ api_key +"&type="+ type +"&price="+ price +"&volume="+ volume;
+      string data = "action=mt5_opn&api_key="+ api_key +"&type="+ type +"&price="+ price +"&volume="+ volume + position_info;
       StringToCharArray( data, post );
       string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
 
@@ -59,7 +63,8 @@ class ACCOUNT {
 
    void closed_position_notification( bool is_sl ) {
       // Info Data
-      string position_info = position_.is_opened ? "&position_profit="+ position_.profit : "";
+      double balance = AccountInfoDouble( ACCOUNT_BALANCE );
+      string position_info = position_.is_opened ? "&position_profit="+ position_.profit +"&account_balance="+ balance : "";
 
       // Request Structure
       string cookie = NULL, headers;

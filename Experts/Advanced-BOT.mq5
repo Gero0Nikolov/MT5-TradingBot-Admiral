@@ -173,7 +173,7 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      if ( !position_.is_opened ) {  
+      if ( !position_.is_opened ) {           
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
             if ( should_open( -1 ) ) {                  
                open_position( "sell", current_tick.bid );
@@ -184,7 +184,7 @@ void OnTick() {
             }
          }
       } else if ( position_.is_opened ) {
-         position_.select = PositionSelectByTicket( position_.ticket_id );
+         position_.select = PositionSelect( Symbol() );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
          // Update Position Lowest & Highest Price
