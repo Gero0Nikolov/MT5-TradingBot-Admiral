@@ -7,6 +7,7 @@ class ACCOUNT {
    double initial_deposit;
    double withdraw_percentage;
    int ping_counter;
+   int leverage;
 
    ACCOUNT() {
       // Get Account Currency
@@ -29,6 +30,9 @@ class ACCOUNT {
 
       // Set Ping Counter to 0
       this.ping_counter = 0;
+
+      // Set account levarage
+      this.leverage = AccountInfoInteger( ACCOUNT_LEVERAGE ) > 20 ? 20 : AccountInfoInteger( ACCOUNT_LEVERAGE );
    }
 
    void set_currency_exchange_rate() {

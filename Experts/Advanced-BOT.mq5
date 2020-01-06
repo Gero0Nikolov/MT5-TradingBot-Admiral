@@ -72,7 +72,7 @@ int OnInit(){
    Print( "Currency Exchange Rate: "+ account_.currency_exchange_rate );
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
-   Print( "Leverage: "+ AccountInfoInteger( ACCOUNT_LEVERAGE ) );
+   Print( "Leverage: "+ account_.leverage );
    Print( "Library size: "+ ArraySize( library_ ) );
 
    return(INIT_SUCCEEDED);
