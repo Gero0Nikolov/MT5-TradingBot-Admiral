@@ -42,7 +42,7 @@ class VIRTUAL_TRADER {
         if ( type == "sell" ) {
             sl_price = opening_price + ( instrument_.slm / 100 * opening_price );
         } else if ( type == "buy" ) {
-            sl_price = opening_price + ( instrument_.slm / 100 * opening_price );
+            sl_price = opening_price - ( instrument_.slm / 100 * opening_price );
         }
 
         return sl_price;
@@ -66,34 +66,30 @@ class VIRTUAL_TRADER {
                         vp_[ count_position ].opening_price > hour_.actual_price &&
                         vp_[ count_position ].opening_price - hour_.actual_price > instrument_.tp_listener
                     ) { // TP Listener
-                        double price_difference = hour_.actual_price - vp_[ count_position ].lowest_price;
-
-                        if ( price_difference > 0 ) {
-                            double difference_in_percentage = ( price_difference / ( ( hour_.actual_price + vp_[ count_position ].lowest_price ) / 2 ) ) * 100;
-                            if ( difference_in_percentage >= instrument_.tpm ) { this.close_virtual_position( count_position, false ); }
+                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
+                            this.close_virtual_position( count_position, false );
                         }
                     } else if ( 
-                        vp_[ count_position ].opening_price < hour_.actual_price &&
-                        hour_.actual_price >= vp_[ count_position ].sl_price
+                        vp_[ count_position ].opening_price < hour_.actual_price
                     ) { // SL Listener
-                        this.close_virtual_position( count_position, true );
+                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
+                            this.close_virtual_position( count_position, true );
+                        }
                     }
                 } else if ( vp_[ count_position ].type == "buy" ) {
                     if (
                         vp_[ count_position ].opening_price < hour_.actual_price &&
                         hour_.actual_price - vp_[ count_position ].opening_price > instrument_.tp_listener
                     ) { // TP Listener
-                        double price_difference = vp_[ count_position ].highest_price - hour_.actual_price;
-
-                        if ( price_difference > 0 ) {
-                            double difference_in_percentage = ( price_difference / ( ( vp_[ count_position ].highest_price + hour_.actual_price ) / 2 ) ) * 100;
-                            if ( difference_in_percentage >= instrument_.tpm ) { this.close_virtual_position( count_position, false ); }
+                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
+                            this.close_virtual_position( count_position, false );
                         }
                     } else if (
-                        vp_[ count_position ].opening_price > hour_.actual_price &&
-                        hour_.actual_price <= vp_[ count_position ].sl_price
+                        vp_[ count_position ].opening_price > hour_.actual_price
                     ) { // SL Listener
-                        this.close_virtual_position( count_position, true );
+                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
+                            this.close_virtual_position( count_position, true );
+                        }
                     }
                 }                
             }

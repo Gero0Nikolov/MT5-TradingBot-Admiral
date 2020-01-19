@@ -9,7 +9,7 @@ bool should_open( int type ) {
             trend_.bulls_power < 0 &&
             minute_.opening_price - minute_.actual_price >= instrument_.opm
         ) { 
-            if ( !is_risky_deal( -1 ) ) {
+            if ( was_successful( -1 ) ) {
                 flag = true; 
             }
         }
@@ -21,9 +21,31 @@ bool should_open( int type ) {
             trend_.bulls_power > 0 &&
             minute_.actual_price - minute_.opening_price >= instrument_.opm
         ) { 
-            if ( !is_risky_deal( 1 ) ) {
+            if ( was_successful( 1 ) ) {
                 flag = true;
             }
+        }
+    }
+
+    return flag;
+}
+
+bool should_close( int type ) {
+    bool flag = false;
+
+    if ( type == -1 ) { // Sell
+        if (
+            hour_.is_in_direction( "buy" ) &&
+            trend_.bulls_power > 0
+        ) { 
+           flag = true;
+        }
+    } else if ( type == 1 ) {
+        if (
+            hour_.is_in_direction( "sell" ) &&
+            trend_.bulls_power < 0
+        ) { 
+            flag = true;
         }
     }
 

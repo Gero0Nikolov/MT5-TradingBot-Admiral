@@ -64,7 +64,7 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Read the Library
-   //read_library();
+   read_library();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -84,7 +84,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to the Library
-   //store_to_library();
+   store_to_library();
 }
 
 // Expert timer function
@@ -133,7 +133,7 @@ void OnTick() {
          hour_.highest_price = hour_.opening_price;
 
          // Store to the Library
-         //store_to_library(); 
+         store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -166,7 +166,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         //account_.ping();
+         account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -196,38 +196,18 @@ void OnTick() {
 
          // Set Listeners
          if ( position_.profit > instrument_.tp_listener ) { // Take Profit Listener
-            if ( position_.type == "sell" ) {
-               position_.price_difference = hour_.actual_price - position_.lowest_price;
-
-               if ( position_.price_difference > 0 ) {
-                  position_.difference_in_percentage = ( position_.price_difference / ( ( hour_.actual_price + position_.lowest_price ) / 2 ) ) * 100;
-                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "sell" ); }
-               }
-            } else if ( position_.type == "buy" ) {
-               position_.price_difference = position_.highest_price - hour_.actual_price;
-
-               if ( position_.price_difference > 0 ) {
-                  position_.difference_in_percentage = ( position_.price_difference / ( ( position_.highest_price + hour_.actual_price ) / 2 ) ) * 100;
-                  if ( position_.difference_in_percentage >= instrument_.tpm ) { close_position( "buy" ); }
-               }
+            if ( should_close( position_.type == "sell" ? -1 : 1 ) ) {
+               close_position( position_.type );
             }
          } else if ( position_.profit <= 0 ) { // Stop Loss Listener
-            if ( position_.type == "sell" ) {
-               position_.price_difference = hour_.actual_price - position_.opening_price;
-               position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
-               
-               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "sell", true ); }
-            } else if ( position_.type == "buy" ) {
-               position_.price_difference = position_.opening_price - hour_.actual_price ;
-               position_.difference_in_percentage = ( position_.price_difference / position_.opening_price ) * 100;
-               
-               if ( position_.difference_in_percentage >= instrument_.slm ) { close_position( "buy", true ); }
+            if ( should_close( position_.type == "sell" ? -1 : 1 ) ) {
+               close_position( position_.type, true );
             }
          }
       }
 
       // Virtual Mode
-      if ( position_.is_opened ) { // Create new Virtual Positions only if there are already OPENED positions
+      if ( !position_.picked ) { // Create new Virtual Positions only if there are already OPENED positions
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
             if ( should_open_virtual_positions( -1 ) ) {
                vt_.open_virtual_position( "sell", current_tick.bid );

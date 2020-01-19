@@ -12,13 +12,13 @@ void update_trade_library( double rsi, double bulls_power, string type, double p
 int exists_in_library( double rsi, double bulls_power, int type, double price ) {
     int key = -1;
 
-    rsi = NormalizeDouble( rsi, 2 );
-    bulls_power = NormalizeDouble( bulls_power, 2 );
+    rsi = NormalizeDouble( rsi, 1 );
+    bulls_power = NormalizeDouble( bulls_power, 1 );
     //price = NormalizeDouble( price, 0 );
 
     for ( int count_lib_elements = 0; count_lib_elements < ArraySize( library_ ); count_lib_elements++ ) {
-        double rsi__ = NormalizeDouble( library_[ count_lib_elements ].rsi, 2 );
-        double bulls_power__ = NormalizeDouble( library_[ count_lib_elements ].bulls_power, 2 );
+        double rsi__ = NormalizeDouble( library_[ count_lib_elements ].rsi, 1 );
+        double bulls_power__ = NormalizeDouble( library_[ count_lib_elements ].bulls_power, 1 );
 
         // double rsi__ = library_[ count_lib_elements ].rsi;
         // double bulls_power__ = library_[ count_lib_elements ].bulls_power;
