@@ -10,6 +10,7 @@ class VIRTUAL_POSITION {
     bool success; // If the success flag is TRUE then the position was closed by the TP, else if it's FALSE then the position was closed by SL
     double lowest_price;
     double highest_price;
+    double spread;
 
     VIRTUAL_POSITION() {
         this.type = "";
@@ -22,5 +23,6 @@ class VIRTUAL_POSITION {
         this.success = false;
         this.lowest_price = 0;
         this.highest_price = 0;
+        this.spread = 0;
     }    
 }

@@ -17,6 +17,7 @@ class POSITION {
    double lowest_price;
    double highest_price;
    bool picked;
+   double spread;
 
    POSITION() {
       this.id = 0;
@@ -34,6 +35,7 @@ class POSITION {
       this.lowest_price = 0;
       this.highest_price = 0;
       this.picked = false;
+      this.spread = 0;
    }
 
    void reset() {
@@ -52,6 +54,7 @@ class POSITION {
       this.lowest_price = 0;
       this.highest_price = 0;
       this.picked = false;
+      this.spread = 0;
 
       ArrayFree( this.tpl_ );
       ZeroMemory( this.tpl_ );

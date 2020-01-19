@@ -43,7 +43,7 @@ void open_position( string type, double price ) {
         ZeroMemory( order_result );
 
         position_.type = type;
-        position_.opening_price = price;
+        position_.opening_price = type == "sell" ? price - instrument_.spread : price + instrument_.spread;
         position_.volume = volume; 
         position_.is_opened = true;
         position_.rsi = trend_.rsi;
@@ -52,6 +52,7 @@ void open_position( string type, double price ) {
         position_.highest_price = position_.opening_price;
         position_.set_tpl();
         position_.picked = true;
+        position_.spread = instrument_.spread;
 
         // Send Open Position Notification
         //account_.open_position_notification( position_.type, position_.opening_price, position_.volume );

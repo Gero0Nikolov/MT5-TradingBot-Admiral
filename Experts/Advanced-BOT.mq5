@@ -64,7 +64,7 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Read the Library
-   read_library();
+   //read_library();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -112,6 +112,9 @@ void OnTick() {
       MqlDateTime current_time_structure;
       datetime current_time = TimeTradeServer();
       TimeToStruct( current_time, current_time_structure );      
+
+      // Update Spread
+      instrument_.spread = NormalizeDouble( current_tick.ask - current_tick.bid, 2 );
       
       // Reset the Hour
       if ( hour_.is_set && current_time_structure.hour != hour_.key ) {
@@ -224,7 +227,7 @@ void OnTick() {
       }
 
       // Virtual Mode
-      if ( !position_.picked ) { // Create new Virtual Positions only if there are already OPENED positions
+      if ( position_.is_opened ) { // Create new Virtual Positions only if there are already OPENED positions
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
             if ( should_open_virtual_positions( -1 ) ) {
                vt_.open_virtual_position( "sell", current_tick.bid );

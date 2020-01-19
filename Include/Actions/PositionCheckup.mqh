@@ -9,7 +9,7 @@ bool should_open( int type ) {
             trend_.bulls_power < 0 &&
             minute_.opening_price - minute_.actual_price >= instrument_.opm
         ) { 
-            if ( was_successful( -1 ) ) {
+            if ( !is_risky_deal( -1 ) ) {
                 flag = true; 
             }
         }
@@ -21,7 +21,7 @@ bool should_open( int type ) {
             trend_.bulls_power > 0 &&
             minute_.actual_price - minute_.opening_price >= instrument_.opm
         ) { 
-            if ( was_successful( 1 ) ) {
+            if ( !is_risky_deal( 1 ) ) {
                 flag = true;
             }
         }

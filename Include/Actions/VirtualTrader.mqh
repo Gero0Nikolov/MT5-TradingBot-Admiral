@@ -13,7 +13,7 @@ class VIRTUAL_TRADER {
         ArrayResize( vp_, new_size );
         
         vp_[ key ].type = type;
-        vp_[ key ].opening_price = opening_price;
+        vp_[ key ].opening_price = type == "sell" ? opening_price - instrument_.spread : opening_price + instrument_.spread;
         vp_[ key ].rsi = trend_.rsi;
         vp_[ key ].bulls_power = trend_.bulls_power;
         vp_[ key ].tp_price = this.calculate_tp_price( type, opening_price );
@@ -21,6 +21,7 @@ class VIRTUAL_TRADER {
         vp_[ key ].is_opened = true;
         vp_[ key ].lowest_price = vp_[ key ].opening_price;
         vp_[ key ].highest_price = vp_[ key ].opening_price;
+        vp_[ key ].spread = instrument_.spread;
     }
 
     double calculate_tp_price( string type, double opening_price ) {
@@ -135,6 +136,7 @@ class VIRTUAL_TRADER {
                 vp_cpy[ key ].sl_price = vp_[ count_position ].sl_price;
                 vp_cpy[ key ].is_opened = vp_[ count_position ].is_opened;
                 vp_cpy[ key ].success = vp_[ count_position ].success;
+                vp_cpy[ key ].spread = vp_[ count_position ].spread;
             }
         }
 
@@ -158,6 +160,7 @@ class VIRTUAL_TRADER {
             vp_[ key ].sl_price = vp_cpy[ count_position ].sl_price;
             vp_[ key ].is_opened = vp_cpy[ count_position ].is_opened;
             vp_[ key ].success = vp_cpy[ count_position ].success;
+            vp_[ key ].spread = vp_cpy[ count_position ].spread;
         }
 
         // Clear the Virtual Positions Copy
