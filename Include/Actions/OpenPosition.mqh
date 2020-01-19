@@ -51,8 +51,9 @@ void open_position( string type, double price ) {
         position_.lowest_price = position_.opening_price;
         position_.highest_price = position_.opening_price;
         position_.set_tpl();
+        position_.picked = true;
 
         // Send Open Position Notification
-        account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
+        //account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
     }
 }

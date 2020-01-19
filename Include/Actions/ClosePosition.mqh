@@ -24,7 +24,7 @@ void close_position( string type_, bool is_sl = false ) {
         update_trade_library( position_.rsi, position_.bulls_power, position_.type, position_.opening_price, is_sl );
 
         // Notify the Admin the position was closed
-        account_.closed_position_notification( is_sl );
+        //account_.closed_position_notification( is_sl );
 
         // Reset Position
         position_.reset();

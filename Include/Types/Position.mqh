@@ -16,6 +16,7 @@ class POSITION {
    int tpl; // Take Profit Level
    double lowest_price;
    double highest_price;
+   bool picked;
 
    POSITION() {
       this.id = 0;
@@ -32,6 +33,7 @@ class POSITION {
       this.tpl = 100;
       this.lowest_price = 0;
       this.highest_price = 0;
+      this.picked = false;
    }
 
    void reset() {
@@ -49,6 +51,7 @@ class POSITION {
       this.tpl = 100;
       this.lowest_price = 0;
       this.highest_price = 0;
+      this.picked = false;
 
       ArrayFree( this.tpl_ );
       ZeroMemory( this.tpl_ );
