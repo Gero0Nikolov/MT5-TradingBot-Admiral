@@ -9,6 +9,15 @@
 
 // EXAMPLE: #include "../Include/test.mqh"
 
+// Include Indicators
+#include "../Include/Indicators/RSI.mqh";
+#include "../Include/Indicators/STOCH.mqh";
+#include "../Include/Indicators/STOCHRSI.mqh";
+#include "../Include/Indicators/MACD.mqh";
+#include "../Include/Indicators/ATR.mqh";
+#include "../Include/Indicators/ADX.mqh";
+#include "../Include/Indicators/WPR.mqh";
+
 // Include Types
 #include "../Include/Types/VirtualPosition.mqh";
 #include "../Include/Types/Hour.mqh";
@@ -31,6 +40,15 @@
 #include "../Include/Actions/UpdateTradeLibrary.mqh";
 #include "../Include/Actions/PositionCheckup.mqh";
 #include "../Include/Actions/IsFridayEnding.mqh";
+
+// Initialize Indicators
+RSI rsi_;
+STOCH stoch_;
+STOCHRSI stoch_rsi;
+MACD macd_;
+ATR atr_;
+ADX adx_;
+WPR wpr_;
 
 // Initialize Classes - Trading Objects
 VIRTUAL_TRADER vt_;
@@ -64,7 +82,7 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Read the Library
-   read_library();
+   //read_library();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -75,6 +93,14 @@ int OnInit(){
    Print( "Leverage: "+ account_.leverage );
    Print( "Library size: "+ ArraySize( library_ ) );
 
+   Print( rsi_.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
+   Print( stoch_.calculate( PERIOD_M1, 9, 6 ) );
+   Print( stoch_rsi.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
+   Print( macd_.calculate( PERIOD_M1, 12, 26, PRICE_CLOSE ) );
+   Print( atr_.calculate( PERIOD_M1, 14 ) );
+   Print( adx_.calculate( PERIOD_M1, 14 ) );
+   Print( wpr_.calculate( PERIOD_M1, 14 ) );
+
    return(INIT_SUCCEEDED);
 }
 
@@ -84,7 +110,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to the Library
-   store_to_library();
+   //store_to_library();
 }
 
 // Expert timer function
@@ -133,7 +159,7 @@ void OnTick() {
          hour_.highest_price = hour_.opening_price;
 
          // Store to the Library
-         store_to_library(); 
+         //store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -166,7 +192,7 @@ void OnTick() {
          trend_.bulls_power = bulls_power_buffer[ 0 ];
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
