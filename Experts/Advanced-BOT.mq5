@@ -17,6 +17,8 @@
 #include "../Include/Indicators/ATR.mqh";
 #include "../Include/Indicators/ADX.mqh";
 #include "../Include/Indicators/WPR.mqh";
+#include "../Include/Indicators/CCI.mqh";
+#include "../Include/Indicators/BP.mqh";
 
 // Include Types
 #include "../Include/Types/VirtualPosition.mqh";
@@ -49,6 +51,8 @@ MACD macd_;
 ATR atr_;
 ADX adx_;
 WPR wpr_;
+CCI cci_;
+BP bp_;
 
 // Initialize Classes - Trading Objects
 VIRTUAL_TRADER vt_;
@@ -100,6 +104,8 @@ int OnInit(){
    Print( atr_.calculate( PERIOD_M1, 14 ) );
    Print( adx_.calculate( PERIOD_M1, 14 ) );
    Print( wpr_.calculate( PERIOD_M1, 14 ) );
+   Print( cci_.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
+   Print( bp_.calculate( PERIOD_M1, 13 ) );
 
    return(INIT_SUCCEEDED);
 }
