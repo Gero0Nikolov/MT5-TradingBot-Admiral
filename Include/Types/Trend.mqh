@@ -6,6 +6,7 @@ class TREND {
    double rsi;
    double bulls_power;
    bool is_init;
+   int strength;
    int previous_strength;
    bool debug_mode;
 
@@ -16,14 +17,16 @@ class TREND {
       this.rsi = 50;
       this.bulls_power = 0;
       this.is_init = false;
+      this.strength = 0;
       this.previous_strength = 0;
       this.debug_mode = true;
    }
 
-   void get_direction( ENUM_TIMEFRAMES trade_period ) {
-      int direction;
-      bool is_volatile;
-      int strength;
+   bool get_direction( ENUM_TIMEFRAMES trade_period ) {
+      int direction = 0;
+      bool is_volatile = false;
+      int strength = 0;
+      bool flag = false;
 
       // Calculate Direction Based on the 7 Indicators
       direction += rsi_.calculate( trade_period, 14, PRICE_CLOSE );
@@ -39,8 +42,9 @@ class TREND {
       is_volatile = atr_.calculate( trade_period, 14 );
 
       // Calculate Strength
-      this.previous_strength = strength;
+      this.previous_strength = this.strength;
       strength = adx_.calculate( trade_period, 14 );
+      this.strength = strength;
 
       // Debug Mode
       if ( this.debug_mode ) {      
@@ -58,5 +62,9 @@ class TREND {
          Print( "BP: "+ bp_.calculate( trade_period, 13 ) );
          Print( "RVI: "+ rvi_.calculate( trade_period, 14 ) );
       }
+
+      // TODO: Make Proper Calculation of the Trend and connect the Should Open & Should Close Actions
+
+      return flag;
    }
 };

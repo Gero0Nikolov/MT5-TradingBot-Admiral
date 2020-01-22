@@ -30,6 +30,7 @@
 #include "../Include/Types/QType.mqh";
 #include "../Include/Types/InstrumentSetup.mqh";
 #include "../Include/Types/Trend.mqh";
+#include "../Include/Types/CurrentTrend.mqh";
 #include "../Include/Types/TPL.mqh";
 #include "../Include/Types/Position.mqh";
 #include "../Include/Types/Account.mqh";
@@ -99,7 +100,21 @@ int OnInit(){
    Print( "Leverage: "+ account_.leverage );
    Print( "Library size: "+ ArraySize( library_ ) );
 
+   Print( "Period: 1M" );
    trend_.get_direction( PERIOD_M1 );
+   Print( "==========" );
+   Print( "Period: 5M" );
+   trend_.get_direction( PERIOD_M5 );
+   Print( "==========" );
+   Print( "Period: 15M" );
+   trend_.get_direction( PERIOD_M15 );
+   Print( "==========" );
+   Print( "Period: 30M" );
+   trend_.get_direction( PERIOD_M30 );
+   Print( "==========" );
+   Print( "Period: 1H" );
+   trend_.get_direction( PERIOD_H1 );
+   Print( "==========" );
 
    return(INIT_SUCCEEDED);
 }
@@ -204,11 +219,11 @@ void OnTick() {
       // Slicing Time if there is no opened position
       if ( !position_.is_opened ) {           
          if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if ( should_open( -1 ) ) {                  
+            if ( position_.should_open( -1 ) ) {                  
                open_position( "sell", current_tick.bid );
             }
          } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if ( should_open( 1 ) ) {                  
+            if ( position_.should_open( 1 ) ) {                  
                open_position( "buy", current_tick.ask );
             }
          }
@@ -233,21 +248,21 @@ void OnTick() {
       }
 
       // Virtual Mode
-      if ( !position_.picked ) { // Create new Virtual Positions only if there are already OPENED positions
-         if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if ( should_open_virtual_positions( -1 ) ) {
-               vt_.open_virtual_position( "sell", current_tick.bid );
-            }
-         } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if ( should_open_virtual_positions( 1 ) ) {               
-               vt_.open_virtual_position( "buy", current_tick.ask );
-            }
-         }
-      }
+      // if ( !position_.picked ) { // Create new Virtual Positions only if there are already OPENED positions
+      //    if ( minute_.opening_price > minute_.actual_price ) { // Sell
+      //       if ( should_open_virtual_positions( -1 ) ) {
+      //          vt_.open_virtual_position( "sell", current_tick.bid );
+      //       }
+      //    } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
+      //       if ( should_open_virtual_positions( 1 ) ) {               
+      //          vt_.open_virtual_position( "buy", current_tick.ask );
+      //       }
+      //    }
+      // }
 
-      if ( position_.picked ) { position_.picked = false; }
+      // if ( position_.picked ) { position_.picked = false; }
 
-      // Make inspection of the current price and the Virtual Positions
-      vt_.check_virtual_positions();
+      // // Make inspection of the current price and the Virtual Positions
+      // vt_.check_virtual_positions();
    }
 }

@@ -60,6 +60,34 @@ class POSITION {
       ZeroMemory( this.tpl_ );
    }
 
+   bool should_open( int type ) {
+      bool flag = false;     
+
+      if ( type == -1 ) { // Sell
+         if (
+               true == false
+         ) { 
+               if ( was_successful( -1 ) ) {
+                  flag = true; 
+               }
+         }
+      } else if ( type == 1 ) {
+         if (
+               hour_.is_in_direction( "buy" ) &&
+               !hour_.is_big() &&
+               trend_.rsi < 70 &&
+               trend_.bulls_power > 0 &&
+               minute_.actual_price - minute_.opening_price >= instrument_.opm
+         ) { 
+               if ( was_successful( 1 ) ) {
+                  flag = true;
+               }
+         }
+      }
+
+      return flag;
+   }
+
    void set_tpl( int percentage_steps = 10 ) {
       double total_tpm = (instrument_.tpm / 100) * this.opening_price;
 
