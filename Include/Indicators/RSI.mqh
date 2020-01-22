@@ -37,6 +37,9 @@ class RSI {
         if ( scales > 0 ) { direction = 1; }
         else if ( scales < 0 ) { direction = -1; }
 
+        // Reset Indicator
+        this.reset();
+
         return direction;
     }
 };

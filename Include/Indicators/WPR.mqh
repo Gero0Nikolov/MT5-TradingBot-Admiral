@@ -23,7 +23,7 @@ class WPR {
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
 
         double current_wpr = NormalizeDouble( this.buffer[ bars - 1 ], 2 );
-        
+
         for ( int count_bars = bars - 1; count_bars >= 1; count_bars-- ) {
             this.buffer[ count_bars ] = NormalizeDouble( this.buffer[ count_bars ], 2 );
             this.buffer[ count_bars - 1 ] = NormalizeDouble( this.buffer[ count_bars - 1 ], 2 );
@@ -46,6 +46,9 @@ class WPR {
         ) { 
             direction = -1; 
         }
+
+        // Reset Indicator
+        this.reset();
 
         return direction;
     }

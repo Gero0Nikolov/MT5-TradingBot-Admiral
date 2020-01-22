@@ -19,6 +19,7 @@
 #include "../Include/Indicators/WPR.mqh";
 #include "../Include/Indicators/CCI.mqh";
 #include "../Include/Indicators/BP.mqh";
+#include "../Include/Indicators/RVI.mqh";
 
 // Include Types
 #include "../Include/Types/VirtualPosition.mqh";
@@ -53,6 +54,7 @@ ADX adx_;
 WPR wpr_;
 CCI cci_;
 BP bp_;
+RVI rvi_;
 
 // Initialize Classes - Trading Objects
 VIRTUAL_TRADER vt_;
@@ -97,15 +99,7 @@ int OnInit(){
    Print( "Leverage: "+ account_.leverage );
    Print( "Library size: "+ ArraySize( library_ ) );
 
-   Print( rsi_.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
-   Print( stoch_.calculate( PERIOD_M1, 9, 6 ) );
-   Print( stoch_rsi.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
-   Print( macd_.calculate( PERIOD_M1, 12, 26, PRICE_CLOSE ) );
-   Print( atr_.calculate( PERIOD_M1, 14 ) );
-   Print( adx_.calculate( PERIOD_M1, 14 ) );
-   Print( wpr_.calculate( PERIOD_M1, 14 ) );
-   Print( cci_.calculate( PERIOD_M1, 14, PRICE_CLOSE ) );
-   Print( bp_.calculate( PERIOD_M1, 13 ) );
+   trend_.get_direction( PERIOD_M1 );
 
    return(INIT_SUCCEEDED);
 }

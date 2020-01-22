@@ -12,11 +12,11 @@ class ATR {
         ArrayFree( this.buffer );
     }
 
-    int calculate(
+    bool calculate(
         ENUM_TIMEFRAMES trade_period, 
         int bars
     ) {
-        int volatility = 0; // 0 = Low Volatility; 1 = High Volatility
+        bool volatility = false; // FALSE = Low Volatility; TRUE = High Volatility
         int scales = 0;
 
         this.handler = iATR( Symbol(), trade_period, bars );
@@ -33,8 +33,11 @@ class ATR {
             }
         }
 
-        if ( scales > 0 ) { volatility = 1; }
-        else if ( scales < 0 ) { volatility = 0; }
+        if ( scales > 0 ) { volatility = true; }
+        else if ( scales < 0 ) { volatility = false; }
+
+        // Reset Indicator
+        this.reset();
 
         return volatility;
     }

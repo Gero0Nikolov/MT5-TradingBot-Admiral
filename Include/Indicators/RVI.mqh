@@ -1,10 +1,10 @@
-class STOCH {
+class RVI {
     public:
     double handler;
     double main_buffer[];
     double signal_buffer[];
 
-    STOCH() {
+    RVI() {
         this.reset();
     }
 
@@ -14,17 +14,16 @@ class STOCH {
         ArrayFree( this.signal_buffer );
     }
 
-    int calculate( 
+    int calculate(
         ENUM_TIMEFRAMES trade_period, 
-        int k_period,
-        int d_period
-    ) {        
+        int bars
+    ) {
         int direction = 0; // -1 = SELL; 0 = NEUTRAL; 1 = BUY;
 
-        this.handler = iStochastic( Symbol(), trade_period, k_period, d_period, 3, MODE_SMA, STO_CLOSECLOSE );
+        this.handler = iRVI( Symbol(), trade_period, bars );
         CopyBuffer( this.handler, MAIN_LINE, 0, 1, this.main_buffer );
-        CopyBuffer( this.handler, SIGNAL_LINE, 0, 1, this.signal_buffer );
-        
+        CopyBuffer( this.handler, SIGNAL_LINE, 0, 1, this.signal_buffer );        
+
         this.main_buffer[ 0 ] = NormalizeDouble( this.main_buffer[ 0 ], 2 );
         this.signal_buffer[ 0 ] = NormalizeDouble( this.signal_buffer[ 0 ], 2 );
 
@@ -39,4 +38,4 @@ class STOCH {
 
         return direction;
     }
-}
+};

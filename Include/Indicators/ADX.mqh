@@ -40,6 +40,9 @@ class ADX {
         if ( scales > 0 ) { strength = 1; }
         else if ( scales < 0 ) { strength = -1; }
 
+        // Reset Indicator
+        this.reset();
+
         return strength;
     }
 };

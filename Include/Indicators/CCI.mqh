@@ -48,6 +48,9 @@ class CCI {
             direction = -1; 
         }
 
+        // Reset Indicator
+        this.reset();
+
         return direction;
     }
 };
