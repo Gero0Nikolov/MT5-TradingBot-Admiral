@@ -20,8 +20,7 @@ void close_position( string type_, bool is_sl = false ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
 
-        // Check if RSI & BullsPower of the Position were successful or not and add it to the library
-        update_trade_library( position_.rsi, position_.bulls_power, position_.type, position_.opening_price, is_sl );
+        profit = 0;
 
         // Notify the Admin the position was closed
         //account_.closed_position_notification( is_sl );

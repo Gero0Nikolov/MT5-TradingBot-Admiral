@@ -9,15 +9,14 @@ class POSITION {
    bool select;
    double price_difference;
    double difference_in_percentage;
-   double rsi;
-   double bulls_power;
-   TPL tpl_[]; // Take Profit Levels
-   double tpp; // Take Profit Price
-   int tpl; // Take Profit Level
-   double lowest_price;
-   double highest_price;
    bool picked;
    double spread;
+
+   POSITION_DATA data_1m;
+   POSITION_DATA data_5m;
+   POSITION_DATA data_15m;
+   POSITION_DATA data_30m;
+   POSITION_DATA data_1h;
 
    POSITION() {
       this.id = 0;
@@ -28,12 +27,6 @@ class POSITION {
       this.select = false;
       this.price_difference = 0;
       this.difference_in_percentage = 0;
-      this.rsi = 0;
-      this.bulls_power = 0;
-      this.tpp = 0;
-      this.tpl = 100;
-      this.lowest_price = 0;
-      this.highest_price = 0;
       this.picked = false;
       this.spread = 0;
    }
@@ -47,90 +40,92 @@ class POSITION {
       this.select = false;
       this.price_difference = 0;
       this.difference_in_percentage = 0;
-      this.rsi = 0;
-      this.bulls_power = 0;
-      this.tpp = 0;
-      this.tpl = 100;
-      this.lowest_price = 0;
-      this.highest_price = 0;
       this.picked = false;
       this.spread = 0;
-
-      ArrayFree( this.tpl_ );
-      ZeroMemory( this.tpl_ );
+      
+      // Reset Position Data
+      this.data_1m.reset();
+      this.data_15m.reset();
+      this.data_30m.reset();
+      this.data_1h.reset();
    }
 
    bool should_open( int type ) {
-      bool flag = false;     
+      bool flag = false;
+
+      // Recalculate Trend
+      trend_1m.get_direction( PERIOD_M1 );
+      trend_5m.get_direction( PERIOD_M5 );
+      trend_15m.get_direction( PERIOD_M15 );
+      trend_30m.get_direction( PERIOD_M30 );
+      trend_1h.get_direction( PERIOD_H1 );
 
       if ( type == -1 ) { // Sell
          if (
-               true == false
+            (
+               trend_1m.direction <= -3 &&
+               trend_1m.is_volatile &&
+               trend_1m.strength == 1
+            ) &&
+            (
+               trend_5m.direction <= -3 &&
+               trend_5m.is_volatile &&
+               trend_5m.strength == 1
+            ) &&
+            (
+               trend_15m.direction <= -3 &&
+               trend_15m.is_volatile &&
+               trend_15m.strength == 1
+            ) &&
+            (
+               trend_30m.direction <= -3 &&
+               trend_30m.is_volatile &&
+               trend_30m.strength == 1
+            ) &&
+            (
+               trend_1h.direction <= -3 &&
+               trend_1h.strength == 1
+            )
          ) { 
-               if ( was_successful( -1 ) ) {
-                  flag = true; 
-               }
+            flag = true;
          }
-      } else if ( type == 1 ) {
+      } else if ( type == 1 ) { // Buy
          if (
-               hour_.is_in_direction( "buy" ) &&
-               !hour_.is_big() &&
-               trend_.rsi < 70 &&
-               trend_.bulls_power > 0 &&
-               minute_.actual_price - minute_.opening_price >= instrument_.opm
+            (
+               trend_1m.direction >= 3 &&
+               trend_1m.is_volatile &&
+               trend_1m.strength == 1
+            ) &&
+            (
+               trend_5m.direction >= 3 &&
+               trend_5m.is_volatile &&
+               trend_5m.strength == 1
+            ) &&
+            (
+               trend_15m.direction >= 3 &&
+               trend_15m.is_volatile &&
+               trend_15m.strength == 1
+            ) &&
+            (
+               trend_30m.direction >= 3 &&
+               trend_30m.is_volatile &&
+               trend_30m.strength == 1
+            ) &&
+            (
+               trend_1h.direction >= 3 &&
+               trend_1h.strength == 1
+            )
          ) { 
-               if ( was_successful( 1 ) ) {
-                  flag = true;
-               }
+            flag = true;
          }
       }
 
       return flag;
    }
 
-   void set_tpl( int percentage_steps = 10 ) {
-      double total_tpm = (instrument_.tpm / 100) * this.opening_price;
-
-      for ( int count_step = 0; count_step <= 100; count_step += percentage_steps ) {
-         int key = ArraySize( this.tpl_ );
-         int new_size = ArraySize( this.tpl_ ) + 1;
-
-         ArrayResize( this.tpl_, new_size );
-
-         double step_tpm = (count_step / 100.0) * total_tpm;         
-
-         this.tpl_[ key ].level = count_step;
-         this.tpl_[ key ].price = this.type == "buy" ? this.opening_price + step_tpm : this.opening_price - step_tpm;
-         this.tpl_[ key ].difference = step_tpm;
-         this.tpl_[ key ].is_passed = false;
-         
-         // Set position initial TP
-         if ( count_step == 100 ) { this.tpp = this.tpl_[ key ].price; }
-      }
-   }
-
-   void check_tpl() {
-      int count_tpl = ArraySize( this.tpl_ );
-      
-      // Count should start from 1 because level 0 is without a Profit lol
-      for ( int count_step = 1; count_step < count_tpl; count_step++ ) {
-         if (            
-            ( 
-               this.type == "buy" && 
-               !this.tpl_[ count_step ].is_passed &&
-               minute_.actual_price >= this.tpl_[ count_step ].price
-            ) ||
-            (
-               this.type == "sell" &&
-               !this.tpl_[ count_step ].is_passed &&
-               minute_.actual_price <= this.tpl_[ count_step ].price
-            )
-         ) {
-            this.tpp = this.tpl_[ count_step ].price;
-            this.tpl_[ count_step ].is_passed = true;
-            this.tpl = this.tpl_[ count_step ].level;
-            break;
-         }
-      }      
+   bool should_close() {
+      //TODO: Make proper closing
+      bool flag = this.data_15m.strength > trend_15m.strength ? true : false;
+      return flag;
    }
 };

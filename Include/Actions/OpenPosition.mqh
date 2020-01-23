@@ -9,18 +9,6 @@ void open_position( string type, double price ) {
     // Check if volume is above 500 and set the maximum for the Admiral Markets broker = 500
     if ( volume > 500 ) { volume = 500; }
 
-    // Calculate Stop Loss price
-    double stop_loss = 0;
-    double stop_loss_difference = instrument_.slm * price;
-    if ( type == "sell" ) { stop_loss = price + stop_loss_difference; }
-    else if ( type == "buy" ) { stop_loss = price - stop_loss_difference; }
-
-    // Calculate Take Profit price
-    double take_profit = 0;
-    double take_profit_difference = instrument_.tpm * price;
-    if ( type == "sell" ) { take_profit = price - take_profit_difference; }
-    else if ( type == "buy" ) { take_profit = price + take_profit_difference; }
-
     // Order Setup
     order_request.action = TRADE_ACTION_DEAL; 
     order_request.magic = position_.id;
@@ -45,12 +33,7 @@ void open_position( string type, double price ) {
         position_.type = type;
         position_.opening_price = type == "sell" ? price - instrument_.spread : price + instrument_.spread;
         position_.volume = volume; 
-        position_.is_opened = true;
-        position_.rsi = trend_.rsi;
-        position_.bulls_power = trend_.bulls_power;
-        position_.lowest_price = position_.opening_price;
-        position_.highest_price = position_.opening_price;
-        position_.set_tpl();
+        position_.is_opened = true;        
         position_.picked = true;
         position_.spread = instrument_.spread;
 

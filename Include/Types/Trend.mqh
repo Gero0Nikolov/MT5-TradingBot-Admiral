@@ -1,56 +1,44 @@
 class TREND {
    public:
-   double last_hour_actual_price;   
-   double risk_high_price;
-   double risk_low_price;
-   double rsi;
-   double bulls_power;
-   bool is_init;
+   int direction;
+   bool is_volatile;
    int strength;
    int previous_strength;
-   bool debug_mode;
 
    TREND() {
-      this.last_hour_actual_price = 0;      
-      this.risk_high_price = 8000;
-      this.risk_low_price = 6200;
-      this.rsi = 50;
-      this.bulls_power = 0;
-      this.is_init = false;
+      this.direction = 0;
+      this.is_volatile = false;
       this.strength = 0;
       this.previous_strength = 0;
-      this.debug_mode = true;
    }
 
-   bool get_direction( ENUM_TIMEFRAMES trade_period ) {
-      int direction = 0;
-      bool is_volatile = false;
-      int strength = 0;
-      bool flag = false;
+   void get_direction( ENUM_TIMEFRAMES trade_period ) {
+      this.direction = 0;
+      this.is_volatile = false;
+      this.strength = 0;
 
       // Calculate Direction Based on the 7 Indicators
-      direction += rsi_.calculate( trade_period, 14, PRICE_CLOSE );
-      direction += stoch_.calculate( trade_period, 9, 6 );      
-      direction += stoch_rsi.calculate( trade_period, 14, PRICE_CLOSE );      
-      direction += macd_.calculate( trade_period, 12, 26, PRICE_CLOSE );      
-      direction += wpr_.calculate( trade_period, 14 );      
-      direction += cci_.calculate( trade_period, 14, PRICE_CLOSE );      
-      direction += bp_.calculate( trade_period, 13 );      
-      direction += rvi_.calculate( trade_period, 14 );      
+      this.direction += rsi_.calculate( trade_period, 14, PRICE_CLOSE );
+      this.direction += stoch_.calculate( trade_period, 9, 6 );      
+      this.direction += stoch_rsi.calculate( trade_period, 14, PRICE_CLOSE );      
+      this.direction += macd_.calculate( trade_period, 12, 26, PRICE_CLOSE );      
+      this.direction += wpr_.calculate( trade_period, 14 );      
+      this.direction += cci_.calculate( trade_period, 14, PRICE_CLOSE );      
+      this.direction += bp_.calculate( trade_period, 13 );      
+      this.direction += rvi_.calculate( trade_period, 14 );      
 
       // Calculate Volatility
       is_volatile = atr_.calculate( trade_period, 14 );
 
       // Calculate Strength
       this.previous_strength = this.strength;
-      strength = adx_.calculate( trade_period, 14 );
-      this.strength = strength;
+      this.strength = adx_.calculate( trade_period, 14 );
 
       // Debug Mode
-      if ( this.debug_mode ) {      
-         Print( "Direction: "+ direction );
-         Print( "Is Volatile: "+ is_volatile );
-         Print( "Strength: "+ strength );
+      if ( debug ) {      
+         Print( "Direction: "+ this.direction );
+         Print( "Is Volatile: "+ this.is_volatile );
+         Print( "Strength: "+ this.strength );
          Print( "Previous Srength: "+ this.previous_strength );
          Print( "===Indicators:" );
          Print( "RSI: "+ rsi_.calculate( trade_period, 14, PRICE_CLOSE ) );
@@ -62,9 +50,5 @@ class TREND {
          Print( "BP: "+ bp_.calculate( trade_period, 13 ) );
          Print( "RVI: "+ rvi_.calculate( trade_period, 14 ) );
       }
-
-      // TODO: Make Proper Calculation of the Trend and connect the Should Open & Should Close Actions
-
-      return flag;
    }
 };

@@ -7,8 +7,6 @@
 #property link      "https://geronikolov.com"
 #property version   "1.00"
 
-// EXAMPLE: #include "../Include/test.mqh"
-
 // Include Indicators
 #include "../Include/Indicators/RSI.mqh";
 #include "../Include/Indicators/STOCH.mqh";
@@ -22,28 +20,17 @@
 #include "../Include/Indicators/RVI.mqh";
 
 // Include Types
-#include "../Include/Types/VirtualPosition.mqh";
+#include "../Include/Types/Account.mqh";
+#include "../Include/Types/InstrumentSetup.mqh";
 #include "../Include/Types/Hour.mqh";
 #include "../Include/Types/Minute.mqh";
-#include "../Include/Types/Day.mqh";
-#include "../Include/Types/Calendar.mqh";
-#include "../Include/Types/QType.mqh";
-#include "../Include/Types/InstrumentSetup.mqh";
 #include "../Include/Types/Trend.mqh";
-#include "../Include/Types/CurrentTrend.mqh";
-#include "../Include/Types/TPL.mqh";
+#include "../Include/Types/PositionData.mqh";
 #include "../Include/Types/Position.mqh";
-#include "../Include/Types/Account.mqh";
-#include "../Include/Types/TradeLibrary.mqh";
 
 // Include Functions, the so called Actions
-#include "../Include/Actions/VirtualTrader.mqh";
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
-#include "../Include/Actions/IsRiskyDeal.mqh";
-#include "../Include/Actions/UpdateTradeLibrary.mqh";
-#include "../Include/Actions/PositionCheckup.mqh";
-#include "../Include/Actions/IsFridayEnding.mqh";
 
 // Initialize Indicators
 RSI rsi_;
@@ -58,18 +45,18 @@ BP bp_;
 RVI rvi_;
 
 // Initialize Classes - Trading Objects
-VIRTUAL_TRADER vt_;
-VIRTUAL_POSITION vp_[];
-Q_TYPE qs_[ 4 ];
-CALENDAR calendar_( "US" );
 HOUR hour_;
 MINUTE minute_;
-DAY day_;
 INSTRUMENT_SETUP instrument_;
-TREND trend_;
 POSITION position_;
 ACCOUNT account_;
-TRADE_LIBRARY library_[];
+
+// Initialize Trends
+TREND trend_1m;
+TREND trend_5m;
+TREND trend_15m;
+TREND trend_30m;
+TREND trend_1h;
 
 // MQL Defaults
 MqlTradeRequest order_request = {0};
@@ -83,13 +70,22 @@ double rsi_handler;
 double bulls_power_buffer[];
 double bulls_power_handler;
 
+// Inspection Variables
+int position_type = 0; // -1 = Sell; 0 = Not set; 1 = Buy;
+
+// DEBUG MODE CONTROLLER
+bool debug = false;
+double profit = 0;
+TREND trend_1m_DB;
+TREND trend_5m_DB;
+TREND trend_15m_DB;
+TREND trend_30m_DB;
+TREND trend_1h_DB;
+
 // Expert initialization function                                   |
 int OnInit(){
    // Set the EA Timer with period of 1 second
    EventSetTimer( 1 );
-
-   // Read the Library
-   //read_library();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -98,23 +94,6 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ account_.leverage );
-   Print( "Library size: "+ ArraySize( library_ ) );
-
-   Print( "Period: 1M" );
-   trend_.get_direction( PERIOD_M1 );
-   Print( "==========" );
-   Print( "Period: 5M" );
-   trend_.get_direction( PERIOD_M5 );
-   Print( "==========" );
-   Print( "Period: 15M" );
-   trend_.get_direction( PERIOD_M15 );
-   Print( "==========" );
-   Print( "Period: 30M" );
-   trend_.get_direction( PERIOD_M30 );
-   Print( "==========" );
-   Print( "Period: 1H" );
-   trend_.get_direction( PERIOD_H1 );
-   Print( "==========" );
 
    return(INIT_SUCCEEDED);
 }
@@ -123,9 +102,6 @@ int OnInit(){
 void OnDeinit( const int reason ) {
    // Destroy the EA Timer in order to clear RAM
    EventKillTimer();
-
-   // Store to the Library
-   //store_to_library();
 }
 
 // Expert timer function
@@ -133,16 +109,6 @@ void OnTimer() {
    MqlDateTime current_time_structure;
    datetime current_time = TimeTradeServer();
    TimeToStruct( current_time, current_time_structure );
-
-   // Check the year and reset the Qs if needed
-   if ( current_time_structure.year > calendar_.year ) {
-      calendar_.set_qs();
-   }
-
-   // Reset the day if needed
-   if ( current_time_structure.year + current_time_structure.mon + current_time_structure.day != day_.key ) {
-      day_.reset();      
-   }
 }
 
 // Expert tick function                                             |
@@ -172,9 +138,6 @@ void OnTick() {
          hour_.buy_price = current_tick.ask;
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
-
-         // Store to the Library
-         //store_to_library(); 
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -196,16 +159,6 @@ void OnTick() {
          minute_.lowest_price = hour_.opening_price;
          minute_.highest_price = hour_.opening_price;
 
-         // Recalculate RSI
-         rsi_handler = iRSI( Symbol(), PERIOD_M1, 10, PRICE_CLOSE );
-         CopyBuffer( rsi_handler, 0, 0, 1, rsi_buffer );
-         trend_.rsi = rsi_buffer[ 0 ];          
-
-         // Recalculate Bulls Power
-         bulls_power_handler = iBullsPower( Symbol(), PERIOD_M1, 10 );
-         CopyBuffer( bulls_power_handler, 0, 0, 1, bulls_power_buffer );
-         trend_.bulls_power = bulls_power_buffer[ 0 ];
-
          // Send Ping
          //account_.ping();
       } else if ( minute_.is_set == true ) {         
@@ -217,52 +170,39 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      if ( !position_.is_opened ) {           
-         if ( minute_.opening_price > minute_.actual_price ) { // Sell
-            if ( position_.should_open( -1 ) ) {                  
-               open_position( "sell", current_tick.bid );
-            }
-         } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-            if ( position_.should_open( 1 ) ) {                  
-               open_position( "buy", current_tick.ask );
+      if ( !position_.is_opened ) {
+         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
+         
+         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
+            if ( position_.should_open( position_type ) ) {
+               open_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
             }
          }
-      } else if ( position_.is_opened ) {
+      } else if ( position_.is_opened ) {         
          position_.select = PositionSelect( Symbol() );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
-         // Update Position Lowest & Highest Price
-         position_.lowest_price = hour_.actual_price < position_.lowest_price ? hour_.actual_price : position_.lowest_price;
-         position_.highest_price = hour_.actual_price > position_.highest_price ? hour_.actual_price : position_.highest_price;
+         profit = position_.profit > profit ? position_.profit : profit;
 
-         // Set Listeners
-         if ( position_.profit > instrument_.tp_listener ) { // Take Profit Listener
-            if ( should_close( position_.type == "sell" ? -1 : 1 ) ) {
-               close_position( position_.type );
-            }
-         } else if ( position_.profit <= 0 ) { // Stop Loss Listener
-            if ( should_close( position_.type == "sell" ? -1 : 1 ) ) {
-               close_position( position_.type, true );
-            }
+         // Set Listener
+         if ( position_.should_close() ) {
+            close_position( position_.type, position_.profit > 0 ? true : false );
          }
       }
 
-      // Virtual Mode
-      // if ( !position_.picked ) { // Create new Virtual Positions only if there are already OPENED positions
-      //    if ( minute_.opening_price > minute_.actual_price ) { // Sell
-      //       if ( should_open_virtual_positions( -1 ) ) {
-      //          vt_.open_virtual_position( "sell", current_tick.bid );
-      //       }
-      //    } else if ( minute_.opening_price < minute_.actual_price  ) { // Buy
-      //       if ( should_open_virtual_positions( 1 ) ) {               
-      //          vt_.open_virtual_position( "buy", current_tick.ask );
-      //       }
-      //    }
-      // }
-
-      // if ( position_.picked ) { position_.picked = false; }
-
-      // // Make inspection of the current price and the Virtual Positions
-      // vt_.check_virtual_positions();
+      // DEBUG MODE
+      if ( profit > position_.profit ) {
+         trend_1m_DB.get_direction( PERIOD_M1 );
+         trend_5m_DB.get_direction( PERIOD_M5 );
+         trend_15m_DB.get_direction( PERIOD_M15 );
+         trend_30m_DB.get_direction( PERIOD_M30 );
+         trend_1h_DB.get_direction( PERIOD_H1 );
+         Print( "===INDICATORS OF LOWER PROFIT" );
+         Print( "1m: "+ trend_1m_DB.strength );
+         Print( "5m: "+ trend_5m_DB.strength );
+         Print( "15m: "+ trend_15m_DB.strength );
+         Print( "30m: "+ trend_30m_DB.strength );
+         Print( "1h: "+ trend_1h_DB.strength );
+      }
    }
 }
