@@ -31,11 +31,28 @@ void open_position( string type, double price ) {
         ZeroMemory( order_result );
 
         position_.type = type;
-        position_.opening_price = type == "sell" ? price - instrument_.spread : price + instrument_.spread;
+        position_.opening_price = type == "sell" ? price : price + instrument_.spread;
+        position_.profit_price = type == "sell" ? price - instrument_.spread : price + instrument_.spread;
         position_.volume = volume; 
         position_.is_opened = true;        
         position_.picked = true;
         position_.spread = instrument_.spread;
+        position_.picked = true;
+        position_.calculate_tp();
+        position_.calculate_sl();
+
+        // Copy Trend Info
+        position_.data_1m.copy_trend( trend_1m );
+        position_.data_5m.copy_trend( trend_5m );
+        position_.data_15m.copy_trend( trend_15m );
+        position_.data_30m.copy_trend( trend_30m );
+        position_.data_1h.copy_trend( trend_1h );
+
+        if ( debugger_.debug_position ) {
+            Print( "Position #"+ position_.id +" OP: "+ position_.opening_price );
+            Print( "Position #"+ position_.id +" TP: "+ position_.tp_price );
+            Print( "Position #"+ position_.id +" SL: "+ position_.sl_price );
+        }
 
         // Send Open Position Notification
         //account_.open_position_notification( position_.type, position_.opening_price, position_.volume );

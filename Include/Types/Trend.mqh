@@ -17,7 +17,7 @@ class TREND {
       this.is_volatile = false;
       this.strength = 0;
 
-      // Calculate Direction Based on the 7 Indicators
+      // Calculate Direction Based on the 8 Indicators
       this.direction += rsi_.calculate( trade_period, 14, PRICE_CLOSE );
       this.direction += stoch_.calculate( trade_period, 9, 6 );      
       this.direction += stoch_rsi.calculate( trade_period, 14, PRICE_CLOSE );      
@@ -35,7 +35,7 @@ class TREND {
       this.strength = adx_.calculate( trade_period, 14 );
 
       // Debug Mode
-      if ( debug ) {      
+      if ( debugger_.debug_trend ) {      
          Print( "Direction: "+ this.direction );
          Print( "Is Volatile: "+ this.is_volatile );
          Print( "Strength: "+ this.strength );

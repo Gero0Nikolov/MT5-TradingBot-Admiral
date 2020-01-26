@@ -27,10 +27,15 @@
 #include "../Include/Types/Trend.mqh";
 #include "../Include/Types/PositionData.mqh";
 #include "../Include/Types/Position.mqh";
+#include "../Include/Types/VirtualPosition.mqh";
+#include "../Include/Types/Aggregator.mqh";
+#include "../Include/Types/VirtualLibrary.mqh";
+#include "../Include/Types/Debugger.mqh";
 
 // Include Functions, the so called Actions
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
+#include "../Include/Actions/VirtualTrader.mqh";
 
 // Initialize Indicators
 RSI rsi_;
@@ -50,6 +55,7 @@ MINUTE minute_;
 INSTRUMENT_SETUP instrument_;
 POSITION position_;
 ACCOUNT account_;
+AGGREGATOR aggregator_;
 
 // Initialize Trends
 TREND trend_1m;
@@ -57,6 +63,11 @@ TREND trend_5m;
 TREND trend_15m;
 TREND trend_30m;
 TREND trend_1h;
+
+// Initialize Virtual Trader
+VIRTUAL_TRADER vt_;
+VIRTUAL_POSITION vp_[];
+VIRTUAL_LIBRARY vl_;
 
 // MQL Defaults
 MqlTradeRequest order_request = {0};
@@ -74,7 +85,7 @@ double bulls_power_handler;
 int position_type = 0; // -1 = Sell; 0 = Not set; 1 = Buy;
 
 // DEBUG MODE CONTROLLER
-bool debug = false;
+DEBUGGER debugger_;
 
 // Expert initialization function                                   |
 int OnInit(){
@@ -96,6 +107,11 @@ int OnInit(){
 void OnDeinit( const int reason ) {
    // Destroy the EA Timer in order to clear RAM
    EventKillTimer();
+
+   if ( debugger_.debug_virtual_library ) {
+      vl_.print_library_size();
+      vl_.print_library();
+   }
 }
 
 // Expert timer function
@@ -181,5 +197,23 @@ void OnTick() {
             close_position( position_.type, position_.profit > 0 ? true : false );
          }
       }
+
+      // Virtual Trader
+      if ( !position_.picked ) {
+         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
+         
+         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
+            if ( aggregator_.should_open( position_type ) ) {
+               if ( !vl_.was_success( position_type ) ) {
+                  vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
+               }               
+            }
+         }
+      }
+
+      if ( position_.picked ) { position_.picked = false; }
+
+      // Check Virtual Positions
+      vt_.check_virtual_positions();
    }
 }

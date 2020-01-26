@@ -12,38 +12,46 @@ class VIRTUAL_TRADER {
 
         ArrayResize( vp_, new_size );
         
-        vp_[ key ].type = type;
-        vp_[ key ].opening_price = type == "sell" ? opening_price - instrument_.spread : opening_price + instrument_.spread;
-        vp_[ key ].rsi = trend_.rsi;
-        vp_[ key ].bulls_power = trend_.bulls_power;
-        vp_[ key ].tp_price = this.calculate_tp_price( type, opening_price );
-        vp_[ key ].sl_price = this.calculate_sl_price( type, opening_price );
+        vp_[ key ].type = type == "sell" ? -1 : 1;
+        vp_[ key ].opening_price = type == "sell" ? opening_price : opening_price + instrument_.spread;
+        vp_[ key ].profit_price = type == "sell" ? opening_price - instrument_.spread : opening_price + instrument_.spread;
+        vp_[ key ].tp_price = this.calculate_tp_price( type, vp_[ key ].profit_price );
+        vp_[ key ].sl_price = this.calculate_sl_price( type, vp_[ key ].opening_price );
         vp_[ key ].is_opened = true;
-        vp_[ key ].lowest_price = vp_[ key ].opening_price;
-        vp_[ key ].highest_price = vp_[ key ].opening_price;
-        vp_[ key ].spread = instrument_.spread;
+        vp_[ key ].is_profit = false;
+
+        // Copy Trend Info
+        vp_[ key ].data_1m.copy_trend( trend_1m );
+        vp_[ key ].data_5m.copy_trend( trend_5m );
+        vp_[ key ].data_15m.copy_trend( trend_15m );
+        vp_[ key ].data_30m.copy_trend( trend_30m );
+        vp_[ key ].data_1h.copy_trend( trend_1h );
     }
 
-    double calculate_tp_price( string type, double opening_price ) {
-        double tp_price = 0;
+    double calculate_tp_price( string type, double profit_price ) {
+        double tp_price;
 
         if ( type == "sell" ) {
-            tp_price = opening_price - ( instrument_.tpm / 100 * opening_price );
+            tp_price = profit_price - instrument_.tpm;
         } else if ( type == "buy" ) {
-            tp_price = opening_price + ( instrument_.tpm / 100 * opening_price );
+            tp_price = profit_price + instrument_.tpm;
         }
+
+        tp_price = NormalizeDouble( tp_price, 4 );
 
         return tp_price;
     }
 
     double calculate_sl_price( string type, double opening_price ) {
         double sl_price = 0;
-
+        
         if ( type == "sell" ) {
-            sl_price = opening_price + ( instrument_.slm / 100 * opening_price );
+            sl_price = opening_price + (instrument_.spread + instrument_.slm);
         } else if ( type == "buy" ) {
-            sl_price = opening_price - ( instrument_.slm / 100 * opening_price );
+            sl_price = opening_price - (instrument_.spread + instrument_.slm);
         }
+
+        sl_price = NormalizeDouble( sl_price, 4 );
 
         return sl_price;
     }
@@ -55,43 +63,13 @@ class VIRTUAL_TRADER {
         // Check Virtual Positions
         if ( ArraySize( vp_ ) > 0 ) {
             int vp_size = ArraySize( vp_ );
-            for ( int count_position = 0; count_position < vp_size; count_position++ ) {
-                // Update Position Lowest & Highest Prices
-                vp_[ count_position ].lowest_price = hour_.actual_price < vp_[ count_position ].lowest_price ? hour_.actual_price : vp_[ count_position ].lowest_price;
-                vp_[ count_position ].highest_price = hour_.actual_price > vp_[ count_position ].highest_price ? hour_.actual_price : vp_[ count_position ].highest_price;
 
-                // Set Listeners
-                if ( vp_[ count_position ].type == "sell" ) {                    
-                    if ( 
-                        vp_[ count_position ].opening_price > hour_.actual_price &&
-                        vp_[ count_position ].opening_price - hour_.actual_price > instrument_.tp_listener
-                    ) { // TP Listener
-                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
-                            this.close_virtual_position( count_position, false );
-                        }
-                    } else if ( 
-                        vp_[ count_position ].opening_price < hour_.actual_price
-                    ) { // SL Listener
-                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
-                            this.close_virtual_position( count_position, true );
-                        }
-                    }
-                } else if ( vp_[ count_position ].type == "buy" ) {
-                    if (
-                        vp_[ count_position ].opening_price < hour_.actual_price &&
-                        hour_.actual_price - vp_[ count_position ].opening_price > instrument_.tp_listener
-                    ) { // TP Listener
-                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
-                            this.close_virtual_position( count_position, false );
-                        }
-                    } else if (
-                        vp_[ count_position ].opening_price > hour_.actual_price
-                    ) { // SL Listener
-                        if ( should_close( vp_[ count_position ].type == "sell" ? -1 : 1 ) ) {
-                            this.close_virtual_position( count_position, true );
-                        }
-                    }
-                }                
+            for ( int count_position = 0; count_position < vp_size; count_position++ ) {  
+                vp_[ count_position ].update_profit();
+
+                if ( vp_[ count_position ].should_close() ) {
+                    this.close_virtual_position( count_position, vp_[ count_position ].is_profit ? false : true );
+                }           
             }
 
             // Check if there are new closed positions, revise the Virtual Positions to keep the memory clean
@@ -109,7 +87,9 @@ class VIRTUAL_TRADER {
         this.closed_positions += 1;
 
         // Add the position to the Trade Library
-        update_trade_library( vp_[ key ].rsi, vp_[ key ].bulls_power, vp_[ key ].type, vp_[ key ].opening_price, is_sl );
+        if ( vp_[ key ].success ) {
+            vl_.add_new_vp( vp_[ key ] );
+        }
     }
 
     void revise_virtual_positions() {
@@ -126,13 +106,18 @@ class VIRTUAL_TRADER {
 
                 vp_cpy[ key ].type = vp_[ count_position].type;
                 vp_cpy[ key ].opening_price = vp_[ count_position ].opening_price;
-                vp_cpy[ key ].rsi = vp_[ count_position ].rsi;
-                vp_cpy[ key ].bulls_power = vp_[ count_position ].bulls_power;
+                vp_cpy[ key ].profit_price = vp_[ count_position ].profit_price;
                 vp_cpy[ key ].tp_price = vp_[ count_position ].tp_price;
                 vp_cpy[ key ].sl_price = vp_[ count_position ].sl_price;
                 vp_cpy[ key ].is_opened = vp_[ count_position ].is_opened;
                 vp_cpy[ key ].success = vp_[ count_position ].success;
-                vp_cpy[ key ].spread = vp_[ count_position ].spread;
+
+                // Copy Data Info
+                vp_cpy[ key ].data_1m.copy_data_info( vp_[ count_position ].data_1m );
+                vp_cpy[ key ].data_5m.copy_data_info( vp_[ count_position ].data_5m );
+                vp_cpy[ key ].data_15m.copy_data_info( vp_[ count_position ].data_15m );
+                vp_cpy[ key ].data_30m.copy_data_info( vp_[ count_position ].data_30m );
+                vp_cpy[ key ].data_1h.copy_data_info( vp_[ count_position ].data_1h );
             }
         }
 
@@ -150,13 +135,18 @@ class VIRTUAL_TRADER {
 
             vp_[ key ].type = vp_cpy[ count_position].type;
             vp_[ key ].opening_price = vp_cpy[ count_position ].opening_price;
-            vp_[ key ].rsi = vp_cpy[ count_position ].rsi;
-            vp_[ key ].bulls_power = vp_cpy[ count_position ].bulls_power;
+            vp_[ key ].profit_price = vp_cpy[ count_position ].profit_price;
             vp_[ key ].tp_price = vp_cpy[ count_position ].tp_price;
             vp_[ key ].sl_price = vp_cpy[ count_position ].sl_price;
             vp_[ key ].is_opened = vp_cpy[ count_position ].is_opened;
             vp_[ key ].success = vp_cpy[ count_position ].success;
-            vp_[ key ].spread = vp_cpy[ count_position ].spread;
+
+            // Copy Data Info    
+            vp_[ key ].data_1m.copy_data_info( vp_cpy[ count_position ].data_1m );
+            vp_[ key ].data_5m.copy_data_info( vp_cpy[ count_position ].data_5m );
+            vp_[ key ].data_15m.copy_data_info( vp_cpy[ count_position ].data_15m );
+            vp_[ key ].data_30m.copy_data_info( vp_cpy[ count_position ].data_30m );
+            vp_[ key ].data_1h.copy_data_info( vp_cpy[ count_position ].data_1h );
         }
 
         // Clear the Virtual Positions Copy

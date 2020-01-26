@@ -3,6 +3,7 @@ class POSITION {
    int id;
    string type;
    double opening_price;
+   double profit_price;
    double volume;
    bool is_opened;
    double profit;
@@ -11,6 +12,8 @@ class POSITION {
    double difference_in_percentage;
    bool picked;
    double spread;
+   double tp_price;
+   double sl_price;
 
    POSITION_DATA data_1m;
    POSITION_DATA data_5m;
@@ -21,6 +24,7 @@ class POSITION {
    POSITION() {
       this.id = 0;
       this.opening_price = 0;
+      this.profit_price = 0;
       this.volume = 0;
       this.is_opened = false;
       this.profit = 0;
@@ -29,11 +33,15 @@ class POSITION {
       this.difference_in_percentage = 0;
       this.picked = false;
       this.spread = 0;
+      this.tp_price = 0;
+      this.sl_price = 0;
+      this.picked = false;
    }
 
    void reset() {
       this.id += 1;
       this.opening_price = 0;
+      this.profit_price = 0;
       this.volume = 0;
       this.is_opened = false;
       this.profit = 0;
@@ -42,6 +50,9 @@ class POSITION {
       this.difference_in_percentage = 0;
       this.picked = false;
       this.spread = 0;
+      this.tp_price = 0;
+      this.sl_price = 0;
+      this.picked = false;
       
       // Reset Position Data
       this.data_1m.reset();
@@ -53,69 +64,8 @@ class POSITION {
    bool should_open( int type ) {
       bool flag = false;
 
-      // Recalculate Trend
-      trend_1m.get_direction( PERIOD_M1 );
-      trend_5m.get_direction( PERIOD_M5 );
-      trend_15m.get_direction( PERIOD_M15 );
-      trend_30m.get_direction( PERIOD_M30 );
-      trend_1h.get_direction( PERIOD_H1 );
-
-      if ( type == -1 ) { // Sell
-         if (
-            (
-               trend_1m.direction <= -3 &&
-               trend_1m.is_volatile &&
-               trend_1m.strength == 1
-            ) &&
-            (
-               trend_5m.direction <= -3 &&
-               trend_5m.is_volatile &&
-               trend_5m.strength == 1
-            ) &&
-            (
-               trend_15m.direction <= -3 &&
-               trend_15m.is_volatile &&
-               trend_15m.strength == 1
-            ) &&
-            (
-               trend_30m.direction <= -3 &&
-               trend_30m.is_volatile &&
-               trend_30m.strength == 1
-            ) &&
-            (
-               trend_1h.direction <= -3 &&
-               trend_1h.strength == 1
-            )
-         ) { 
-            flag = true;
-         }
-      } else if ( type == 1 ) { // Buy
-         if (
-            (
-               trend_1m.direction >= 3 &&
-               trend_1m.is_volatile &&
-               trend_1m.strength == 1
-            ) &&
-            (
-               trend_5m.direction >= 3 &&
-               trend_5m.is_volatile &&
-               trend_5m.strength == 1
-            ) &&
-            (
-               trend_15m.direction >= 3 &&
-               trend_15m.is_volatile &&
-               trend_15m.strength == 1
-            ) &&
-            (
-               trend_30m.direction >= 3 &&
-               trend_30m.is_volatile &&
-               trend_30m.strength == 1
-            ) &&
-            (
-               trend_1h.direction >= 3 &&
-               trend_1h.strength == 1
-            )
-         ) { 
+      if ( aggregator_.should_open( type ) ) {
+         if ( vl_.was_success( type ) ) {
             flag = true;
          }
       }
@@ -124,8 +74,42 @@ class POSITION {
    }
 
    bool should_close() {
-      //TODO: Make proper closing
-      bool flag = this.data_15m.strength > trend_15m.strength ? true : false;
+      bool flag = false;
+
+      if ( this.profit > 0 ) { // Take Profit Listener
+         if ( this.type == "sell" ) {
+            if ( hour_.actual_price <= this.tp_price ) { flag = true; }
+         } else if ( this.type == "buy" ) {
+            if ( hour_.actual_price >= this.tp_price ) { flag = true; }
+         }
+      } else if ( this.profit < 0 ) { // Stop Loss Listener
+         if ( this.type == "sell" ) {
+            if ( hour_.actual_price >= this.sl_price ) { flag = true; }
+         } else if ( this.type == "buy" ) {
+            if ( hour_.actual_price <= this.sl_price ) { flag = true; }
+         }
+      }
+
       return flag;
+   }
+
+   void calculate_tp() {
+      if ( this.type == "sell" ) {
+         this.tp_price = this.profit_price - instrument_.tpm;
+      } else if ( this.type == "buy" ) {
+         this.tp_price = this.profit_price + instrument_.tpm;
+      }
+
+      this.tp_price = NormalizeDouble( this.tp_price, 4 );
+   }
+
+   void calculate_sl() {
+      if ( this.type == "sell" ) {
+         this.sl_price = this.opening_price + (this.spread + instrument_.slm);
+      } else if ( this.type == "buy" ) {
+         this.sl_price = this.opening_price - (this.spread + instrument_.slm);
+      }
+
+      this.sl_price = NormalizeDouble( this.sl_price, 4 );
    }
 };
