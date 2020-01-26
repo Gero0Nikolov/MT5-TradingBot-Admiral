@@ -75,12 +75,6 @@ int position_type = 0; // -1 = Sell; 0 = Not set; 1 = Buy;
 
 // DEBUG MODE CONTROLLER
 bool debug = false;
-double profit = 0;
-TREND trend_1m_DB;
-TREND trend_5m_DB;
-TREND trend_15m_DB;
-TREND trend_30m_DB;
-TREND trend_1h_DB;
 
 // Expert initialization function                                   |
 int OnInit(){
@@ -182,27 +176,10 @@ void OnTick() {
          position_.select = PositionSelect( Symbol() );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
 
-         profit = position_.profit > profit ? position_.profit : profit;
-
          // Set Listener
          if ( position_.should_close() ) {
             close_position( position_.type, position_.profit > 0 ? true : false );
          }
-      }
-
-      // DEBUG MODE
-      if ( profit > position_.profit ) {
-         trend_1m_DB.get_direction( PERIOD_M1 );
-         trend_5m_DB.get_direction( PERIOD_M5 );
-         trend_15m_DB.get_direction( PERIOD_M15 );
-         trend_30m_DB.get_direction( PERIOD_M30 );
-         trend_1h_DB.get_direction( PERIOD_H1 );
-         Print( "===INDICATORS OF LOWER PROFIT" );
-         Print( "1m: "+ trend_1m_DB.strength );
-         Print( "5m: "+ trend_5m_DB.strength );
-         Print( "15m: "+ trend_15m_DB.strength );
-         Print( "30m: "+ trend_30m_DB.strength );
-         Print( "1h: "+ trend_1h_DB.strength );
       }
    }
 }
