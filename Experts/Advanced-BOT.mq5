@@ -194,26 +194,26 @@ void OnTick() {
 
          // Set Listener
          if ( position_.should_close() ) {
-            close_position( position_.type, position_.profit > 0 ? true : false );
+            close_position( position_.type, position_.profit > 0 ? false : true );
          }
       }
 
       // Virtual Trader
-      if ( !position_.picked ) {
-         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
+      // if ( !position_.picked ) {
+      //    position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
          
-         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
-            if ( aggregator_.should_open( position_type ) ) {
-               if ( !vl_.was_success( position_type ) ) {
-                  vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
-               }               
-            }
-         }
-      }
+      //    if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
+      //       if ( aggregator_.should_open( position_type ) ) {
+      //          if ( !vl_.was_success( position_type ) ) {
+      //             vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
+      //          }               
+      //       }
+      //    }
+      // }
 
-      if ( position_.picked ) { position_.picked = false; }
+      // if ( position_.picked ) { position_.picked = false; }
 
-      // Check Virtual Positions
-      vt_.check_virtual_positions();
+      // // Check Virtual Positions
+      // vt_.check_virtual_positions();
    }
 }

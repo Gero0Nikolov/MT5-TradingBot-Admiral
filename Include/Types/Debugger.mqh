@@ -8,9 +8,9 @@ class DEBUGGER {
 
     DEBUGGER() {
         this.debug_trend = false;
-        this.debug_virtual_trader = true;
-        this.debug_virtual_library = true;
+        this.debug_virtual_trader = false;
+        this.debug_virtual_library = false;
         this.debug_virtual_position = false;
-        this.debug_position = false;
+        this.debug_position = true;
     }
 }

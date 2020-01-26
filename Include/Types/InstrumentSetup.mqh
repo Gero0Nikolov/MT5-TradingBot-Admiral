@@ -3,16 +3,14 @@ class INSTRUMENT_SETUP {
    string name;
    double spread;
    int opm;
-   int tpm;
-   int slm;
-   int tpi;
+   double tpm;
+   double slm;
 
    INSTRUMENT_SETUP() {
       this.name = "NQ100";
       this.spread = 0;
       this.opm = 10;
-      this.tpm = 3;
-      this.slm = 10;
-      this.tpi = 5;
+      this.tpm = 0.66 / 100;
+      this.slm = 1 / 100;
    }
 };

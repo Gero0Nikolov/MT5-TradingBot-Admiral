@@ -65,9 +65,7 @@ class POSITION {
       bool flag = false;
 
       if ( aggregator_.should_open( type ) ) {
-         if ( vl_.was_success( type ) ) {
-            flag = true;
-         }
+         flag = true;
       }
 
       return flag;
@@ -94,20 +92,24 @@ class POSITION {
    }
 
    void calculate_tp() {
+      double percentage_difference = this.profit_price * instrument_.tpm;
+
       if ( this.type == "sell" ) {
-         this.tp_price = this.profit_price - instrument_.tpm;
+         this.tp_price = this.profit_price - percentage_difference;
       } else if ( this.type == "buy" ) {
-         this.tp_price = this.profit_price + instrument_.tpm;
+         this.tp_price = this.profit_price + percentage_difference;
       }
 
       this.tp_price = NormalizeDouble( this.tp_price, 4 );
    }
 
    void calculate_sl() {
+      double percentage_difference = this.opening_price * instrument_.tpm;
+
       if ( this.type == "sell" ) {
-         this.sl_price = this.opening_price + (this.spread + instrument_.slm);
+         this.sl_price = this.opening_price + percentage_difference;
       } else if ( this.type == "buy" ) {
-         this.sl_price = this.opening_price - (this.spread + instrument_.slm);
+         this.sl_price = this.opening_price - percentage_difference;
       }
 
       this.sl_price = NormalizeDouble( this.sl_price, 4 );

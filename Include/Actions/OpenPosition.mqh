@@ -49,9 +49,9 @@ void open_position( string type, double price ) {
         position_.data_1h.copy_trend( trend_1h );
 
         if ( debugger_.debug_position ) {
-            Print( "Position #"+ position_.id +" OP: "+ position_.opening_price );
-            Print( "Position #"+ position_.id +" TP: "+ position_.tp_price );
-            Print( "Position #"+ position_.id +" SL: "+ position_.sl_price );
+            Print( "Position #"+ position_.id +" 1hD: "+ position_.data_1h.direction );
+            Print( "Position #"+ position_.id +" 1hV: "+ position_.data_1h.is_volatile );
+            Print( "Position #"+ position_.id +" 1hS: "+ position_.data_1h.strength );
         }
 
         // Send Open Position Notification
