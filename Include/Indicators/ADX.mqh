@@ -20,6 +20,7 @@ class ADX {
         int scales = 0;
 
         this.handler = iADX( Symbol(), trade_period, bars );
+        bars = 3;
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
         
         double current_adx = NormalizeDouble( this.buffer[ bars - 1 ], 2 );

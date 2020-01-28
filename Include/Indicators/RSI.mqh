@@ -54,15 +54,4 @@ class RSI {
 
         return direction;
     }
-
-    double get_rsi(
-        ENUM_TIMEFRAMES trade_period, 
-        int bars, 
-        ENUM_APPLIED_PRICE price_type
-    ) {
-        double handler = iRSI( Symbol(), trade_period, bars, price_type );
-        double buffer[];
-        CopyBuffer( handler, 0, 0, 1, buffer );
-        return NormalizeDouble( buffer[ 0 ], 2 );
-    }
 };

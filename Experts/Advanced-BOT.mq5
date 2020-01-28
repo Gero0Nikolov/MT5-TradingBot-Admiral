@@ -9,15 +9,9 @@
 
 // Include Indicators
 #include "../Include/Indicators/RSI.mqh";
-#include "../Include/Indicators/STOCH.mqh";
-#include "../Include/Indicators/STOCHRSI.mqh";
-#include "../Include/Indicators/MACD.mqh";
 #include "../Include/Indicators/ATR.mqh";
 #include "../Include/Indicators/ADX.mqh";
-#include "../Include/Indicators/WPR.mqh";
-#include "../Include/Indicators/CCI.mqh";
 #include "../Include/Indicators/BP.mqh";
-#include "../Include/Indicators/RVI.mqh";
 
 // Include Types
 #include "../Include/Types/Account.mqh";
@@ -39,15 +33,9 @@
 
 // Initialize Indicators
 RSI rsi_;
-STOCH stoch_;
-STOCHRSI stoch_rsi;
-MACD macd_;
 ATR atr_;
 ADX adx_;
-WPR wpr_;
-CCI cci_;
 BP bp_;
-RVI rvi_;
 
 // Initialize Classes - Trading Objects
 HOUR hour_;
