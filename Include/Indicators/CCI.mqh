@@ -21,6 +21,7 @@ class CCI {
         int scales = 0;
 
         this.handler = iCCI( Symbol(), trade_period, bars, price_type );
+        bars = 3;
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
 
         double current_cci = NormalizeDouble( this.buffer[ bars - 1 ], 2 );

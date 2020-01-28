@@ -24,9 +24,14 @@ class MINUTE {
       this.highest_price = 0;
    }
 
-   bool is_spike() {
-      double difference = this.opening_price - this.actual_price;
-      difference = difference < 0 ? difference * (-1) : difference;
+   bool is_spike( string type ) {
+      double difference = 0;
+
+      if ( type == "sell" ) {
+         difference = this.opening_price - this.actual_price;
+      } else if ( type == "buy" ) {
+         difference = this.actual_price - this.opening_price;
+      }
 
       return difference >= instrument_.opm;
    }

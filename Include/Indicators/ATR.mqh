@@ -20,6 +20,7 @@ class ATR {
         int scales = 0;
 
         this.handler = iATR( Symbol(), trade_period, bars );
+        bars = 3;
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
 
         for ( int count_bars = bars - 1; count_bars >= 1; count_bars-- ) {

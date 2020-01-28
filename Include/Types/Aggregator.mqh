@@ -8,26 +8,19 @@ class AGGREGATOR {
 
         // Recalculate Trend
         trend_1m.get_direction( PERIOD_M1 );
-        trend_5m.get_direction( PERIOD_M5 );
-        trend_15m.get_direction( PERIOD_M15 );
-        trend_30m.get_direction( PERIOD_M30 );
-        trend_1h.get_direction( PERIOD_H1 );
+        trend_1m.current_rsi = rsi_.get_rsi( PERIOD_M1, 14, PRICE_CLOSE );
 
         if (
             !hour_.is_big() &&
-            trend_1h.is_volatile
+            !trend_1m.is_volatile
         ) {
             if ( type == -1 ) { // Sell
                 if (
                     (
                         trend_1m.direction < 0 &&
-                        trend_1m.strength == 1
-                    ) &&
-                    (
-                        trend_5m.direction < 0 &&
-                        trend_5m.strength == 1
-                    ) &&
-                    minute_.is_spike()
+                        trend_1m.current_rsi > 25
+                    ) &&              
+                    minute_.is_spike( "sell" )
                 ) { 
                     if ( hour_.is_in_direction( "sell" ) ) {
                         flag = true;
@@ -37,13 +30,9 @@ class AGGREGATOR {
                 if (
                     (
                         trend_1m.direction > 0 &&
-                        trend_1m.strength == 1
+                        trend_1m.current_rsi < 75
                     ) &&
-                    (
-                        trend_5m.direction > 0 &&
-                        trend_5m.strength == 1
-                    ) &&
-                    minute_.is_spike()
+                    minute_.is_spike( "buy" )
                 ) { 
                     if ( hour_.is_in_direction( "buy" ) ) {
                         flag = true;

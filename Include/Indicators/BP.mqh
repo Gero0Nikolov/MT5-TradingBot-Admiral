@@ -20,6 +20,7 @@ class BP {
         int scales = 0;
 
         this.handler = iBullsPower( Symbol(), trade_period, bars );
+        bars = 2;
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
         
         double current_bp = NormalizeDouble( this.buffer[ bars - 1 ], 3 );

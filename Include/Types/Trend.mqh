@@ -4,12 +4,18 @@ class TREND {
    bool is_volatile;
    int strength;
    int previous_strength;
+   int bars;
+   int rsi_result;
+   double current_rsi;
 
    TREND() {
       this.direction = 0;
       this.is_volatile = false;
       this.strength = 0;
       this.previous_strength = 0;
+      this.bars = 2;
+      this.rsi_result = 0;
+      this.current_rsi = 50;
    }
 
    void get_direction( ENUM_TIMEFRAMES trade_period ) {
@@ -17,15 +23,13 @@ class TREND {
       this.is_volatile = false;
       this.strength = 0;
 
-      // Calculate Direction Based on the 8 Indicators
-      this.direction += rsi_.calculate( trade_period, 14, PRICE_CLOSE );
-      this.direction += stoch_.calculate( trade_period, 9, 6 );      
-      this.direction += stoch_rsi.calculate( trade_period, 14, PRICE_CLOSE );      
-      this.direction += macd_.calculate( trade_period, 12, 26, PRICE_CLOSE );      
-      this.direction += wpr_.calculate( trade_period, 14 );      
-      this.direction += cci_.calculate( trade_period, 14, PRICE_CLOSE );      
-      this.direction += bp_.calculate( trade_period, 13 );      
-      this.direction += rvi_.calculate( trade_period, 14 );      
+      // Calculate Direction Based on the 5 Indicators
+      this.rsi_result = rsi_.calculate( trade_period, 14, PRICE_CLOSE );
+      
+      if ( this.rsi_result != 0 ) {
+         this.direction += this.rsi_result;   
+         this.direction += bp_.calculate( trade_period, 13 );
+      }
 
       // Calculate Volatility
       is_volatile = atr_.calculate( trade_period, 14 );

@@ -20,6 +20,7 @@ class WPR {
         int scales = 0;
 
         this.handler = iWPR( Symbol(), trade_period, bars );
+        bars = 3;
         CopyBuffer( this.handler, 0, 0, bars, this.buffer );
 
         double current_wpr = NormalizeDouble( this.buffer[ bars - 1 ], 2 );

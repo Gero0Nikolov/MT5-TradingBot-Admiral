@@ -11,6 +11,6 @@ class DEBUGGER {
         this.debug_virtual_trader = false;
         this.debug_virtual_library = false;
         this.debug_virtual_position = false;
-        this.debug_position = true;
+        this.debug_position = false;
     }
 }
