@@ -74,19 +74,21 @@ class POSITION {
    bool should_close() {
       bool flag = false;
 
-      if ( this.profit > 0 ) { // Take Profit Listener
-         if ( this.type == "sell" ) {
-            if ( hour_.actual_price <= this.tp_price ) { flag = true; }
-         } else if ( this.type == "buy" ) {
-            if ( hour_.actual_price >= this.tp_price ) { flag = true; }
-         }
-      } else if ( this.profit < 0 ) { // Stop Loss Listener
-         if ( this.type == "sell" ) {
-            if ( hour_.actual_price >= this.sl_price ) { flag = true; }
-         } else if ( this.type == "buy" ) {
-            if ( hour_.actual_price <= this.sl_price ) { flag = true; }
-         }
-      }
+      // if ( this.profit > 0 ) { // Take Profit Listener
+      //    if ( this.type == "sell" ) {
+      //       if ( hour_.actual_price <= this.tp_price ) { flag = true; }
+      //    } else if ( this.type == "buy" ) {
+      //       if ( hour_.actual_price >= this.tp_price ) { flag = true; }
+      //    }
+      // } else if ( this.profit < 0 ) { // Stop Loss Listener
+      //    if ( this.type == "sell" ) {
+      //       if ( hour_.actual_price >= this.sl_price ) { flag = true; }
+      //    } else if ( this.type == "buy" ) {
+      //       if ( hour_.actual_price <= this.sl_price ) { flag = true; }
+      //    }
+      // }
+
+      flag = aggregator_.should_close( this.type == "sell" ? -1 : 1 );
 
       return flag;
    }

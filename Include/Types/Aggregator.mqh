@@ -42,4 +42,42 @@ class AGGREGATOR {
 
         return flag;
    }
+
+   bool should_close( int type ) {
+       bool flag = false;
+
+       type = type == -1 ? 1 : -1;
+
+        // Recalculate Trend
+        trend_1m.get_direction( PERIOD_M1 );
+
+        if (
+            !hour_.is_big() &&
+            !trend_1m.is_volatile &&
+            trend_1m.previous_strength != 1 &&
+            trend_1m.strength > -1
+        ) {
+            if ( type == -1 ) { // Sell
+                if (
+                    (
+                        trend_1m.direction < 0
+                    ) &&              
+                    minute_.is_spike( "sell" )
+                ) { 
+                    flag = true;
+                }
+            } else if ( type == 1 ) { // Buy
+                if (
+                    (
+                        trend_1m.direction > 0
+                    ) &&
+                    minute_.is_spike( "buy" )
+                ) { 
+                    flag = true;
+                }
+            }
+        }
+
+        return flag;
+   }
 };
