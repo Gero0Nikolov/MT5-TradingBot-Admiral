@@ -17,9 +17,7 @@ class AGGREGATOR {
         ) {
             if ( type == -1 ) { // Sell
                 if (
-                    (
-                        trend_1m.direction < 0
-                    ) &&              
+                    trend_1m.direction < 0 &&              
                     minute_.is_spike( "sell" )
                 ) { 
                     if ( hour_.is_in_direction( "sell" ) ) {
@@ -28,9 +26,7 @@ class AGGREGATOR {
                 }
             } else if ( type == 1 ) { // Buy
                 if (
-                    (
-                        trend_1m.direction > 0
-                    ) &&
+                    trend_1m.direction > 0 &&
                     minute_.is_spike( "buy" )
                 ) { 
                     if ( hour_.is_in_direction( "buy" ) ) {
@@ -44,9 +40,10 @@ class AGGREGATOR {
    }
 
    bool should_close( int type ) {
-       bool flag = false;
+        bool flag = false;
 
-       type = type == -1 ? 1 : -1;
+        // Convert Position Type to the oposite direction;
+        type = type == -1 ? 1 : -1;
 
         // Recalculate Trend
         trend_1m.get_direction( PERIOD_M1 );
@@ -59,18 +56,14 @@ class AGGREGATOR {
         ) {
             if ( type == -1 ) { // Sell
                 if (
-                    (
-                        trend_1m.direction < 0
-                    ) &&              
+                    trend_1m.direction < 0 &&              
                     minute_.is_spike( "sell" )
                 ) { 
                     flag = true;
                 }
             } else if ( type == 1 ) { // Buy
                 if (
-                    (
-                        trend_1m.direction > 0
-                    ) &&
+                    trend_1m.direction > 0 &&
                     minute_.is_spike( "buy" )
                 ) { 
                     flag = true;

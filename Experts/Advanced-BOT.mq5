@@ -158,7 +158,7 @@ void OnTick() {
          minute_.highest_price = hour_.opening_price;
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -179,6 +179,9 @@ void OnTick() {
       } else if ( position_.is_opened ) {         
          position_.select = PositionSelect( Symbol() );
          position_.profit = PositionGetDouble( POSITION_PROFIT );
+
+         // Calculate Margin Level
+         position_.calculate_margin_level();
 
          // Set Listener
          if ( position_.should_close() ) {

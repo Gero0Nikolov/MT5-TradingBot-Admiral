@@ -14,6 +14,7 @@ class POSITION {
    double spread;
    double tp_price;
    double sl_price;
+   double margin_level;
 
    POSITION_DATA data_1m;
    POSITION_DATA data_5m;
@@ -36,6 +37,7 @@ class POSITION {
       this.tp_price = 0;
       this.sl_price = 0;
       this.picked = false;
+      this.margin_level = 0;
    }
 
    void reset() {
@@ -53,6 +55,7 @@ class POSITION {
       this.tp_price = 0;
       this.sl_price = 0;
       this.picked = false;
+      this.margin_level = 0;
       
       // Reset Position Data
       this.data_1m.reset();
@@ -72,48 +75,10 @@ class POSITION {
    }
 
    bool should_close() {
-      bool flag = false;
-
-      // if ( this.profit > 0 ) { // Take Profit Listener
-      //    if ( this.type == "sell" ) {
-      //       if ( hour_.actual_price <= this.tp_price ) { flag = true; }
-      //    } else if ( this.type == "buy" ) {
-      //       if ( hour_.actual_price >= this.tp_price ) { flag = true; }
-      //    }
-      // } else if ( this.profit < 0 ) { // Stop Loss Listener
-      //    if ( this.type == "sell" ) {
-      //       if ( hour_.actual_price >= this.sl_price ) { flag = true; }
-      //    } else if ( this.type == "buy" ) {
-      //       if ( hour_.actual_price <= this.sl_price ) { flag = true; }
-      //    }
-      // }
-
-      flag = aggregator_.should_close( this.type == "sell" ? -1 : 1 );
-
-      return flag;
+      return aggregator_.should_close( this.type == "sell" ? -1 : 1 ) || this.margin_level <= account_.margin_call;
    }
 
-   void calculate_tp() {
-      double percentage_difference = this.profit_price * instrument_.tpm;
-
-      if ( this.type == "sell" ) {
-         this.tp_price = this.profit_price - percentage_difference;
-      } else if ( this.type == "buy" ) {
-         this.tp_price = this.profit_price + percentage_difference;
-      }
-
-      this.tp_price = NormalizeDouble( this.tp_price, 4 );
-   }
-
-   void calculate_sl() {
-      double percentage_difference = this.opening_price * instrument_.tpm;
-
-      if ( this.type == "sell" ) {
-         this.sl_price = this.opening_price + percentage_difference;
-      } else if ( this.type == "buy" ) {
-         this.sl_price = this.opening_price - percentage_difference;
-      }
-
-      this.sl_price = NormalizeDouble( this.sl_price, 4 );
+   void calculate_margin_level() {
+      this.margin_level = AccountInfoDouble( ACCOUNT_MARGIN_LEVEL );
    }
 };

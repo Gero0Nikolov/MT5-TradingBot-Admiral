@@ -5,6 +5,7 @@ class ACCOUNT {
    double currency_exchange_rate;
    double trading_percent;
    double initial_deposit;
+   double margin_call;
    int leverage;
 
    ACCOUNT() {
@@ -25,6 +26,9 @@ class ACCOUNT {
 
       // Set account levarage
       this.leverage = AccountInfoInteger( ACCOUNT_LEVERAGE ) > 20 ? 20 : AccountInfoInteger( ACCOUNT_LEVERAGE );
+
+      // Set minimum possible Margin Call
+      this.margin_call = 150.0;
    }
 
    void set_currency_exchange_rate() {

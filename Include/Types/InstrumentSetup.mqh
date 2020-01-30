@@ -9,7 +9,7 @@ class INSTRUMENT_SETUP {
    INSTRUMENT_SETUP() {
       this.name = "NQ100";
       this.spread = 0;
-      this.opm = 10;
+      this.opm = 7;
       this.tpm = 0.66 / 100;
       this.slm = 1 / 100;
    }

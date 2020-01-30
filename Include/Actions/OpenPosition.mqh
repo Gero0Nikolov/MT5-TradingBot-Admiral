@@ -38,8 +38,9 @@ void open_position( string type, double price ) {
         position_.picked = true;
         position_.spread = instrument_.spread;
         position_.picked = true;
-        position_.calculate_tp();
-        position_.calculate_sl();
+        
+        // Calculate Margin Level
+        position_.calculate_margin_level();
 
         // Copy Trend Info
         position_.data_1m.copy_trend( trend_1m );
@@ -55,6 +56,6 @@ void open_position( string type, double price ) {
         }
 
         // Send Open Position Notification
-        account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
+        //account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
     }
 }
