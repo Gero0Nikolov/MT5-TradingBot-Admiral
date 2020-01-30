@@ -33,9 +33,8 @@ void open_position( string type, double price ) {
         position_.type = type;
         position_.opening_price = type == "sell" ? price : price + instrument_.spread;
         position_.volume = volume; 
-        position_.is_opened = true;        
-        position_.picked = true;
         position_.spread = instrument_.spread;
+        position_.is_opened = true;
         position_.picked = true;
         
         // Calculate Margin Level

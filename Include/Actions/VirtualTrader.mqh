@@ -59,6 +59,7 @@ class VIRTUAL_TRADER {
 
         // Add or Update the position to the Trade Library
         if ( vp_[ key ].success ) {
+            vl_.update_from_vp( vp_[ key ] );
         }
     }
 

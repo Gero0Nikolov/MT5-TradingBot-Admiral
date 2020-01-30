@@ -50,4 +50,19 @@ class VIRTUAL_POSITION {
         this.data_30m.copy_data_info( vp_.data_30m );
         this.data_1h.copy_data_info( vp_.data_1h );
     }
+
+    void copy_position( POSITION &position_ ) {
+        this.type = position_.type == "sell" ? -1 : 1;
+        this.opening_price = position_.opening_price;
+        this.closing_price = position_.closing_price;
+        this.is_opened = false; // The Position will be destroyed after that so assume it's closed :D
+        this.success = position_.success;
+        
+        // Copy Data Info
+        this.data_1m.copy_data_info( position_.data_1m );
+        this.data_5m.copy_data_info( position_.data_5m );
+        this.data_15m.copy_data_info( position_.data_15m );
+        this.data_30m.copy_data_info( position_.data_30m );
+        this.data_1h.copy_data_info( position_.data_1h );
+    }
 }

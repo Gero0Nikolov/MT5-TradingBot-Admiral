@@ -5,11 +5,11 @@ class POSITION {
    bool is_opened;
    bool select;
    bool picked;
+   bool success;
    double opening_price;
+   double closing_price;
    double volume;
    double profit;
-   double price_difference;
-   double difference_in_percentage;
    double spread;
    double margin_level;
 
@@ -21,31 +21,29 @@ class POSITION {
 
    POSITION() {
       this.id = 0;
-      this.opening_price = 0;
-      this.volume = 0;
       this.is_opened = false;
-      this.profit = 0;
       this.select = false;
-      this.price_difference = 0;
-      this.difference_in_percentage = 0;
       this.picked = false;
+      this.success = false;
+      this.opening_price = 0;
+      this.closing_price = 0;
+      this.volume = 0;
+      this.profit = 0;
       this.spread = 0;
-      this.picked = false;
       this.margin_level = 0;
    }
 
    void reset() {
       this.id += 1;
-      this.opening_price = 0;
-      this.volume = 0;
-      this.is_opened = false;
-      this.profit = 0;
       this.select = false;
-      this.price_difference = 0;
-      this.difference_in_percentage = 0;
       this.picked = false;
-      this.spread = 0;
-      this.picked = false;
+      this.success = false;
+      this.is_opened = false;
+      this.opening_price = 0;
+      this.closing_price = 0;
+      this.volume = 0;
+      this.profit = 0;
+      this.spread = 0;      
       this.margin_level = 0;
       
       // Reset Position Data

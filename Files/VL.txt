@@ -1,0 +1,5 @@
+-1,9013.1,8969.690000000001,true,-1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0
+1,9184.49,9245.66,true,2,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0
+-1,8817.200000000001,8741.190000000001,true,-2,false,1,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0
+-1,9186.639999999999,9182.969999999999,true,-1,false,1,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0
+1,8986.51,9020.15,true,2,false,1,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0

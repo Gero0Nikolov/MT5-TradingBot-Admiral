@@ -80,6 +80,9 @@ int OnInit(){
    // Set the EA Timer with period of 1 second
    EventSetTimer( 1 );
 
+   // Reat the Virtual Library from VL.txt
+   vl_.read();
+
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
@@ -87,6 +90,7 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ account_.leverage );
+   Print( "Virtual Library (VL) Size: "+ ArraySize( vl_.vp_ ) );
 
    return(INIT_SUCCEEDED);
 }
@@ -96,9 +100,13 @@ void OnDeinit( const int reason ) {
    // Destroy the EA Timer in order to clear RAM
    EventKillTimer();
 
+   // Store to Virtual Libary
+   vl_.save();
+
+   // Virtual Library Debugger
    if ( debugger_.debug_virtual_library ) {
       vl_.print_library_size();
-      vl_.print_library();
+      // vl_.print_library();
    }
 }
 
@@ -168,43 +176,41 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      if ( !position_.is_opened ) {
-         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
-         
-         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
-            if ( position_.should_open( position_type ) ) {
-               open_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
-            }
-         }
-      } else if ( position_.is_opened ) {         
-         position_.select = PositionSelect( Symbol() );
-         position_.profit = PositionGetDouble( POSITION_PROFIT );
-
-         // Calculate Margin Level
-         position_.calculate_margin_level();
-
-         // Set Listener
-         if ( position_.should_close() ) {
-            close_position( position_.type, position_.profit > 0 ? false : true );
-         }
-      }
-
-      // Virtual Trader
-      // if ( !position_.picked ) {
+      // if ( !position_.is_opened ) {
       //    position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
          
       //    if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
-      //       if ( aggregator_.should_open( position_type ) ) {
-      //          if ( !vl_.was_success( position_type ) ) {
-      //             vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
-      //          }               
+      //       if ( position_.should_open( position_type ) ) {
+      //          open_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
       //       }
+      //    }
+      // } else if ( position_.is_opened ) {         
+      //    position_.select = PositionSelect( Symbol() );
+      //    position_.profit = PositionGetDouble( POSITION_PROFIT );
+
+      //    // Calculate Margin Level
+      //    position_.calculate_margin_level();
+
+      //    // Set Listener
+      //    if ( position_.should_close() ) {
+      //       close_position( position_.type, position_.profit > 0 ? false : true );
       //    }
       // }
 
-      // if ( position_.picked ) { position_.picked = false; }
+      // Virtual Trader
+      if ( !position_.picked ) {
+         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
+         
+         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
+            if ( aggregator_.should_open( position_type ) ) {
+               vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );               
+            }
+         }
+      }
 
-      // // Check Virtual Positions
-      // vt_.check_virtual_positions();
+      if ( position_.picked ) { position_.picked = false; }
+
+      // Check Virtual Positions
+      vt_.check_virtual_positions();
    }
 }
