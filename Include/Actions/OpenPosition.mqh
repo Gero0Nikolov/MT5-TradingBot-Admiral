@@ -32,7 +32,6 @@ void open_position( string type, double price ) {
 
         position_.type = type;
         position_.opening_price = type == "sell" ? price : price + instrument_.spread;
-        position_.profit_price = type == "sell" ? price - instrument_.spread : price + instrument_.spread;
         position_.volume = volume; 
         position_.is_opened = true;        
         position_.picked = true;

@@ -21,8 +21,8 @@
 #include "../Include/Types/Trend.mqh";
 #include "../Include/Types/PositionData.mqh";
 #include "../Include/Types/Position.mqh";
-#include "../Include/Types/VirtualPosition.mqh";
 #include "../Include/Types/Aggregator.mqh";
+#include "../Include/Types/VirtualPosition.mqh";
 #include "../Include/Types/VirtualLibrary.mqh";
 #include "../Include/Types/Debugger.mqh";
 
