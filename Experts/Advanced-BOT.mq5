@@ -80,7 +80,7 @@ int OnInit(){
    // Set the EA Timer with period of 1 second
    EventSetTimer( 1 );
 
-   // Reat the Virtual Library from VL.txt
+   // Read the Virtual Library from VL.txt
    vl_.read();
 
    // Print Account Info
@@ -144,6 +144,9 @@ void OnTick() {
          hour_.buy_price = current_tick.ask;
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
+
+         // Store to Virtual Libary
+         vl_.save();
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -176,26 +179,26 @@ void OnTick() {
       }
 
       // Slicing Time if there is no opened position
-      // if ( !position_.is_opened ) {
-      //    position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
+      if ( !position_.is_opened ) {
+         position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
          
-      //    if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
-      //       if ( position_.should_open( position_type ) ) {
-      //          open_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
-      //       }
-      //    }
-      // } else if ( position_.is_opened ) {         
-      //    position_.select = PositionSelect( Symbol() );
-      //    position_.profit = PositionGetDouble( POSITION_PROFIT );
+         if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
+            if ( position_.should_open( position_type ) ) {
+               open_position( position_type == -1 ? "sell" : "buy", current_tick.bid );
+            }
+         }
+      } else if ( position_.is_opened ) {         
+         position_.select = PositionSelect( Symbol() );
+         position_.profit = PositionGetDouble( POSITION_PROFIT );
 
-      //    // Calculate Margin Level
-      //    position_.calculate_margin_level();
+         // Calculate Margin Level
+         position_.calculate_margin_level();
 
-      //    // Set Listener
-      //    if ( position_.should_close() ) {
-      //       close_position( position_.type, position_.profit > 0 ? false : true );
-      //    }
-      // }
+         // Set Listener
+         if ( position_.should_close() ) {
+            close_position( position_.type, position_.profit > 0 ? false : true );
+         }
+      }
 
       // Virtual Trader
       if ( !position_.picked ) {

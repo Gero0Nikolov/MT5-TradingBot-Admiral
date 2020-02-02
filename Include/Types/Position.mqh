@@ -56,7 +56,10 @@ class POSITION {
    bool should_open( int type ) {
       bool flag = false;
 
-      if ( aggregator_.should_open( type ) ) {
+      if ( 
+         aggregator_.should_open( type ) &&
+         this.is_known_as_good( type )
+      ) {
          flag = true;
       }
 
@@ -69,5 +72,26 @@ class POSITION {
 
    void calculate_margin_level() {
       this.margin_level = AccountInfoDouble( ACCOUNT_MARGIN_LEVEL );
+   }
+
+   bool is_known_as_good( int type ) {
+      bool flag = false;
+      POSITION position_;
+
+      // Copy Current Trend Data
+      position_.data_1m.copy_trend( trend_1m );
+      position_.data_5m.copy_trend( trend_5m );
+      position_.data_15m.copy_trend( trend_15m );
+      position_.data_30m.copy_trend( trend_30m );
+      position_.data_1h.copy_trend( trend_1h );
+
+      // Check if the desired New Position is exists in the Virtual Library (VL)
+      int vp_key = vl_.find_from_position( position_ );
+
+      if ( vp_key > -1 ) {
+         flag = vl_.vp_[ vp_key ].success;
+      }
+
+      return flag;
    }
 };

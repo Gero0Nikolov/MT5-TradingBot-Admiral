@@ -35,7 +35,7 @@ class HOUR {
    }
 
    bool is_big() {
-      return this.highest_price - this.lowest_price >= 25;
+      return this.highest_price - this.lowest_price >= instrument_.bhs;
    }
 
    bool is_stable( string direction ) {

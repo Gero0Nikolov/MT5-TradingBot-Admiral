@@ -136,7 +136,11 @@ class VIRTUAL_LIBRARY {
                 this.vp_[ count_vp ].data_1m.is_volatile == vp_.data_1m.is_volatile &&
                 this.vp_[ count_vp ].data_1m.previous_strength == vp_.data_1m.previous_strength &&
                 this.vp_[ count_vp ].data_1m.strength == vp_.data_1m.strength &&
-                this.vp_[ count_vp ].data_1m.direction == vp_.data_1m.direction
+                this.vp_[ count_vp ].data_1m.direction == vp_.data_1m.direction &&
+                this.vp_[ count_vp ].data_1h.is_volatile == vp_.data_1h.is_volatile &&
+                this.vp_[ count_vp ].data_1h.previous_strength == vp_.data_1h.previous_strength &&
+                this.vp_[ count_vp ].data_1h.strength == vp_.data_1h.strength &&
+                this.vp_[ count_vp ].data_1h.direction == vp_.data_1h.direction
             ) {
                 key = count_vp;
                 break;
@@ -184,7 +188,11 @@ class VIRTUAL_LIBRARY {
                 this.vp_[ count_vp ].data_1m.is_volatile == position_.data_1m.is_volatile &&
                 this.vp_[ count_vp ].data_1m.previous_strength == position_.data_1m.previous_strength &&
                 this.vp_[ count_vp ].data_1m.strength == position_.data_1m.strength &&
-                this.vp_[ count_vp ].data_1m.direction == position_.data_1m.direction
+                this.vp_[ count_vp ].data_1m.direction == position_.data_1m.direction &&
+                this.vp_[ count_vp ].data_1h.is_volatile == position_.data_1h.is_volatile &&
+                this.vp_[ count_vp ].data_1h.previous_strength == position_.data_1h.previous_strength &&
+                this.vp_[ count_vp ].data_1h.strength == position_.data_1h.strength &&
+                this.vp_[ count_vp ].data_1h.direction == position_.data_1h.direction
             ) {
                 key = count_vp;
                 break;

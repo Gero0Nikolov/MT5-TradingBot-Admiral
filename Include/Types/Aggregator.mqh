@@ -8,6 +8,7 @@ class AGGREGATOR {
 
         // Recalculate Trend
         trend_1m.get_direction( PERIOD_M1 );
+        trend_1h.get_direction( PERIOD_H1 );
 
         if (
             !hour_.is_big() &&
