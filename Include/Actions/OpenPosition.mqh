@@ -25,35 +25,32 @@ void open_position( string type, double price ) {
     // Execute the Order
     bool is_opened_order = OrderSend( order_request, order_result );
 
-    // If everything went smoothly proceed with Position Data setup
-    if ( order_result.retcode == TRADE_RETCODE_PLACED ) {
-        ZeroMemory( order_request );
-        ZeroMemory( order_result );
+    ZeroMemory( order_request );
+    ZeroMemory( order_result );
 
-        position_.type = type;
-        position_.opening_price = type == "sell" ? price : price + instrument_.spread;
-        position_.volume = volume; 
-        position_.spread = instrument_.spread;
-        position_.is_opened = true;
-        position_.picked = true;
-        
-        // Calculate Margin Level
-        position_.calculate_margin_level();
+    position_.type = type;
+    position_.opening_price = type == "sell" ? price : price + instrument_.spread;
+    position_.volume = volume; 
+    position_.spread = instrument_.spread;
+    position_.is_opened = true;
+    position_.picked = true;
+    
+    // Calculate Margin Level
+    position_.calculate_margin_level();
 
-        // Copy Trend Info
-        position_.data_1m.copy_trend( trend_1m );
-        position_.data_5m.copy_trend( trend_5m );
-        position_.data_15m.copy_trend( trend_15m );
-        position_.data_30m.copy_trend( trend_30m );
-        position_.data_1h.copy_trend( trend_1h );
+    // Copy Trend Info
+    position_.data_1m.copy_trend( trend_1m );
+    position_.data_5m.copy_trend( trend_5m );
+    position_.data_15m.copy_trend( trend_15m );
+    position_.data_30m.copy_trend( trend_30m );
+    position_.data_1h.copy_trend( trend_1h );
 
-        if ( debugger_.debug_position ) {
-            Print( "Position #"+ position_.id +" 1hD: "+ position_.data_1h.direction );
-            Print( "Position #"+ position_.id +" 1hV: "+ position_.data_1h.is_volatile );
-            Print( "Position #"+ position_.id +" 1hS: "+ position_.data_1h.strength );
-        }
-
-        // Send Open Position Notification
-        account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
+    if ( debugger_.debug_position ) {
+        Print( "Position #"+ position_.id +" 1hD: "+ position_.data_1h.direction );
+        Print( "Position #"+ position_.id +" 1hV: "+ position_.data_1h.is_volatile );
+        Print( "Position #"+ position_.id +" 1hS: "+ position_.data_1h.strength );
     }
+
+    // Send Open Position Notification
+    account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
 }
