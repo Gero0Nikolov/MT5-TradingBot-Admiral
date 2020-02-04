@@ -57,8 +57,7 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
-      else if ( res == 200 ) { /* NOTIFICATION WAS SENT! */ }
+      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }      
    }
 
    void closed_position_notification( bool is_sl ) {
@@ -78,8 +77,7 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
-      else if ( res == 200 ) { /* NOTIFICATION WAS SENT! */ }
+      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
    }
 
    void ping() {
@@ -99,7 +97,6 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res == -1 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
-      else if ( res == 200 ) { /* SERVER WAS PINGED */ }
+      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
    }
 };

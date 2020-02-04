@@ -14,9 +14,9 @@ void close_position( string type_, bool is_sl = false ) {
     order_request.price = SymbolInfoDouble( position_symbol, SYMBOL_ASK );
     order_request.type = type_ == "buy" ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
 
-    bool is_closed_order = OrderSend( order_request,order_result );    
+    bool is_closed_order = OrderSend( order_request, order_result );    
 
-    if ( is_closed_order ) {
+    if ( order_result.retcode == TRADE_RETCODE_PLACED ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
 

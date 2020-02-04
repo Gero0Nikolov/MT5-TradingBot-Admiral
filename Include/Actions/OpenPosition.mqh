@@ -26,7 +26,7 @@ void open_position( string type, double price ) {
     bool is_opened_order = OrderSend( order_request, order_result );
 
     // If everything went smoothly proceed with Position Data setup
-    if ( is_opened_order ) {
+    if ( order_result.retcode == TRADE_RETCODE_PLACED ) {
         ZeroMemory( order_request );
         ZeroMemory( order_result );
 
