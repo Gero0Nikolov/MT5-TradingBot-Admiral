@@ -6,6 +6,7 @@ class INSTRUMENT_SETUP {
    double bhs; // Big Hour Size
    double tpm; // Take Profit Movement # Not used
    double slm; // Stop Loss Movement # Not used
+   int success_code;
 
    INSTRUMENT_SETUP() {
       this.name = "NQ100";
@@ -14,5 +15,6 @@ class INSTRUMENT_SETUP {
       this.bhs = 25;
       this.tpm = 0.66 / 100;
       this.slm = 1 / 100;
+      this.success_code = 10009;
    }
 };

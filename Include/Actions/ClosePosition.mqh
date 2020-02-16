@@ -14,21 +14,26 @@ void close_position( string type_, bool is_sl = false ) {
     order_request.price = SymbolInfoDouble( position_symbol, SYMBOL_ASK );
     order_request.type = type_ == "buy" ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
 
-    bool is_closed_order = OrderSend( order_request, order_result );    
+    bool is_closed_order = OrderSend( order_request, order_result );
 
+    if ( order_result.retcode == instrument_.success_code ) {
+        // Set Position Closing Data
+        position_.closing_price = order_result.price;
+        position_.success = is_sl ? false : true;
+
+        // Perform an update to the Virtual Library (VL) from Normal Position
+        vl_.update_from_position( position_ );
+
+        // Notify the Admin the position was closed
+        account_.closed_position_notification( is_sl );
+
+        // Reset Position
+        position_.reset();
+    } else {
+        Print( "Failed Order Code: "+ order_result.retcode );
+    }
+
+    // Purge the Memory from the Order Data
     ZeroMemory( order_request );
     ZeroMemory( order_result );
-
-    // Set Position Closing Data
-    position_.closing_price = hour_.actual_price;
-    position_.success = is_sl ? false : true;
-
-    // Perform an update to the Virtual Library (VL) from Normal Position
-    vl_.update_from_position( position_ );
-
-    // Notify the Admin the position was closed
-    account_.closed_position_notification( is_sl );
-
-    // Reset Position
-    position_.reset();
 }
