@@ -206,7 +206,7 @@ void OnTick() {
          
          if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
             if ( aggregator_.should_open( position_type ) ) {
-               vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", current_tick.bid );               
+               vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", position_type == -1 ? current_tick.bid : current_tick.ask );               
             }
          }
       }

@@ -57,7 +57,12 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }      
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", GetLastError() );
+
+         // Retry the call
+         this.open_position_notification( type, price, volume );
+      }
    }
 
    void closed_position_notification( bool is_sl ) {
@@ -77,7 +82,12 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", GetLastError() );
+         
+         // Retry the call
+         this.closed_position_notification( is_sl );
+      }
    }
 
    void ping() {
@@ -97,6 +107,11 @@ class ACCOUNT {
 
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
-      if ( res != 200 ) { Print( "Error in WebRequest. Error code: ", GetLastError() ); }
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", GetLastError() ); 
+
+         // Retry the call
+         this.ping();   
+      }
    }
 };

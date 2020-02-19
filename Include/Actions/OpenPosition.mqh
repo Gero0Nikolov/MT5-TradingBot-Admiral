@@ -28,7 +28,7 @@ void open_position( string type, double price ) {
     if ( order_result.retcode == instrument_.success_code ) {
         // Set the Position Data
         position_.type = type;
-        position_.opening_price = order_result.price;
+        position_.opening_price = price;
         position_.volume = order_result.volume; 
         position_.spread = instrument_.spread;
         position_.is_opened = true;
@@ -47,7 +47,8 @@ void open_position( string type, double price ) {
         // Send Open Position Notification
         account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
     } else {
-        Print( "Failed Order Code: "+ order_result.retcode );
+        // Retry position opening
+        open_position( type, price );
     }
 
     // Purge the Memory from the Order Data
