@@ -94,4 +94,53 @@ class POSITION {
 
       return flag;
    }
+
+   string serialize() {
+      string serial = 
+         this.id +","+
+         this.type +","+
+         this.is_opened +","+
+         this.select +","+
+         this.picked +","+
+         this.success +","+
+         this.opening_price +","+
+         this.closing_price +","+
+         this.volume +","+
+         this.profit +","+
+         this.spread +","+
+         this.margin_level +","+
+         this.data_1m.serialize() +","+
+         this.data_5m.serialize() +","+
+         this.data_15m.serialize() +","+
+         this.data_30m.serialize() +","+
+         this.data_1h.serialize()
+      ;
+
+      return serial;
+   }
+
+   void deserialize( string serial ) {
+      string item_[];
+      bool split_result = StringSplit( serial, StringGetCharacter( ",", 0 ), item_ );
+
+      if ( split_result ) {
+         this.id = item_[ 0 ];
+         this.type = item_[ 1 ];
+         this.is_opened = item_[ 2 ] == "true" ? true : false;
+         this.select = item_[ 3 ] == "true" ? true : false;
+         this.picked = item_[ 4 ] == "true" ? true : false;
+         this.success = item_[ 5 ] == "true" ? true : false;
+         this.opening_price = item_[ 6 ];
+         this.closing_price = item_[ 7 ];
+         this.volume = item_[ 8 ];
+         this.profit = item_[ 9 ];
+         this.spread = item_[ 10 ];
+         this.margin_level = item_[ 11 ];
+         this.data_1m.deserialize( item_[ 12 ] +","+ item_[ 13 ] +","+ item_[ 14 ] +","+ item_[ 15 ] );
+         this.data_5m.deserialize( item_[ 16 ] +","+ item_[ 17 ] +","+ item_[ 18 ] +","+ item_[ 19 ] );
+         this.data_15m.deserialize( item_[ 20 ] +","+ item_[ 21 ] +","+ item_[ 22 ] +","+ item_[ 23 ] );
+         this.data_30m.deserialize( item_[ 24 ] +","+ item_[ 25 ] +","+ item_[ 26 ] +","+ item_[ 27 ] );
+         this.data_1h.deserialize( item_[ 28 ] +","+ item_[ 29 ] +","+ item_[ 30 ] +","+ item_[ 31 ] );
+      }
+   }
 };

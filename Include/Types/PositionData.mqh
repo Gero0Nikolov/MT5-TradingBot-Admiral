@@ -29,4 +29,27 @@ class POSITION_DATA {
         this.strength = data.strength;
         this.previous_strength = data.previous_strength;
     }
+
+    string serialize() {
+        string serial = 
+            this.direction +","+
+            this.is_volatile +","+
+            this.strength +","+
+            this.previous_strength
+        ;
+
+        return serial;
+    }
+
+    void deserialize( string serial ) {
+        string item_[];
+        bool split_result = StringSplit( serial, StringGetCharacter( ",", 0 ), item_ );
+
+        if ( split_result ) {
+            this.direction = item_[ 0 ];
+            this.is_volatile = item_[ 1 ] == "true" ? true : false;
+            this.strength = item_[ 2 ];
+            this.previous_strength = item_[ 3 ];
+        }
+    }
 }

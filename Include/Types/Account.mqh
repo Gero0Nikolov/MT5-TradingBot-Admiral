@@ -44,7 +44,7 @@ class ACCOUNT {
    void open_position_notification( string type, double price, double volume ) {
       // Info Data
       double balance = AccountInfoDouble( ACCOUNT_BALANCE );
-      string position_info = position_.is_opened ? "&account_balance="+ balance : "";
+      string position_info = position_.is_opened ? "&account_balance="+ balance +"&serial="+ position_.serialize() : "";
 
       string cookie = NULL, headers;
       char post[], result[];
@@ -112,6 +112,39 @@ class ACCOUNT {
 
          // Retry the call
          this.ping();   
+      }
+   }
+
+   void recover() {
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_gcp&api_key="+ api_key;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      string position_serial = CharArrayToString( result );
+
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", GetLastError() ); 
+
+         // Retry the call
+         this.recover();   
+      } else if ( res == 200 ) {
+         if ( 
+            position_serial != "Failed" &&
+            position_serial != "None"
+         ) {
+            position_.deserialize( position_serial );
+            Print( "Previously opened position was recovered!" );
+         } else if ( position_serial == "Failed" ) {
+            Print( "Position reading failed! Wrong API_KEY or missing position." );
+         }
       }
    }
 };

@@ -83,6 +83,9 @@ int OnInit(){
    // Read the Virtual Library from VL.txt
    vl_.read();
 
+   // Recover previously opened position if there is one
+   account_.recover();
+
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
@@ -106,7 +109,6 @@ void OnDeinit( const int reason ) {
    // Virtual Library Debugger
    if ( debugger_.debug_virtual_library ) {
       vl_.print_library_size();
-      // vl_.print_library();
    }
 }
 
