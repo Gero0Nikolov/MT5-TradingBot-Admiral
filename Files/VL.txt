@@ -15,7 +15,7 @@
 1,6505.05,6612.54,true,1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,-1,false,0,0
 1,7755.17,7805.34,true,1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0
 1,6918.64,6911.08,false,1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,1,false,0,0
--1,9058.360000000001,9036.209999999999,true,-1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,-1,false,1,0
+-1,0.0,0.0,false,-1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,-1,false,1,0
 -1,9057.35,9036.209999999999,true,-1,false,1,0,0,false,0,0,0,false,0,0,0,false,0,0,-1,false,1,0
 -1,8980.35,9026.530000000001,false,-1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,0,false,-1,0
 -1,9386.690000000001,9340.879999999999,true,-1,false,0,0,0,false,0,0,0,false,0,0,0,false,0,0,-1,false,-1,0
