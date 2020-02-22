@@ -72,6 +72,9 @@ double bulls_power_handler;
 // Inspection Variables
 int position_type = 0; // -1 = Sell; 0 = Not set; 1 = Buy;
 
+// Timer Variables
+int seconds = 0;
+
 // DEBUG MODE CONTROLLER
 DEBUGGER debugger_;
 
@@ -114,9 +117,21 @@ void OnDeinit( const int reason ) {
 
 // Expert timer function
 void OnTimer() {
+   // MQL Time Structure
    MqlDateTime current_time_structure;
    datetime current_time = TimeTradeServer();
    TimeToStruct( current_time, current_time_structure );
+
+   // Count Settings
+   seconds += 1;
+
+   // Send ping to the server to check Position Actions
+   if ( seconds == account_.ping_interval ) {
+      account_.get_current_position_closing_action();
+
+      // Reset Seconds Counter
+      seconds = 0;
+   }
 }
 
 // Expert tick function                                             |

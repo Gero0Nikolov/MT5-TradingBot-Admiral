@@ -7,6 +7,7 @@ class ACCOUNT {
    double initial_deposit;
    double margin_call;
    int leverage;
+   int ping_interval;
 
    ACCOUNT() {
       // Get Account Currency
@@ -29,6 +30,9 @@ class ACCOUNT {
 
       // Set minimum possible Margin Call
       this.margin_call = 150.0;
+
+      // Set Ping Interval in Seconds
+      this.ping_interval = 10;
    }
 
    void set_currency_exchange_rate() {
@@ -144,6 +148,42 @@ class ACCOUNT {
             Print( "Previously opened position was recovered!" );
          } else if ( position_serial == "Failed" ) {
             Print( "Position reading failed! Wrong API_KEY or missing position." );
+         }
+      }
+   }
+
+   void get_current_position_closing_action() {
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_gcpca&api_key="+ api_key;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      string response = CharArrayToString( result );
+
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", GetLastError() );
+
+         // Retry the Call
+         this.get_current_position_closing_action();
+      } else if ( res == 200 ) {
+         if ( response != "Failed" ) {
+            if ( response == "true" ) {
+               // Get Current Position Data
+               position_.select = PositionSelect( Symbol() );
+               position_.profit = PositionGetDouble( POSITION_PROFIT );
+
+               // Close the Position
+               close_position( position_.type, position_.profit > 0 ? false : true );
+            }
+         } else {
+            Print( "Current Position Actions Reading Failed" );
          }
       }
    }
