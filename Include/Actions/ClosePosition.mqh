@@ -30,7 +30,7 @@ void close_position( string type_, bool is_sl = false ) {
 
         // Reset Position
         position_.reset();
-    } else if ( order_result.retcode !== 10013 ) {
+    } else if ( order_result.retcode != 10013 ) {
         Print( "Error in position closing! Code: "+ order_result.retcode );
 
         // Retry closing the position
