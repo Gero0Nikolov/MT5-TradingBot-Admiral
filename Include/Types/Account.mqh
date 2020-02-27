@@ -62,7 +62,7 @@ class ACCOUNT {
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
       if ( res != 200 ) { 
-         Print( "Error in WebRequest. Error code: ", GetLastError() );
+         Print( "Error in WebRequest. Error code: ", res );
 
          // Retry the call
          this.open_position_notification( type, price, volume );
@@ -87,7 +87,7 @@ class ACCOUNT {
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
       if ( res != 200 ) { 
-         Print( "Error in WebRequest. Error code: ", GetLastError() );
+         Print( "Error in WebRequest. Error code: ", res );
          
          // Retry the call
          this.closed_position_notification( is_sl );
@@ -112,10 +112,7 @@ class ACCOUNT {
       int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
 
       if ( res != 200 ) { 
-         Print( "Error in WebRequest. Error code: ", GetLastError() ); 
-
-         // Retry the call
-         this.ping();   
+         Print( "Error in WebRequest. Error code: ", res );
       }
    }
 
@@ -135,7 +132,7 @@ class ACCOUNT {
       string position_serial = CharArrayToString( result );
 
       if ( res != 200 ) { 
-         Print( "Error in WebRequest. Error code: ", GetLastError() ); 
+         Print( "Error in WebRequest. Error code: ", res ); 
 
          // Retry the call
          this.recover();   
@@ -168,7 +165,7 @@ class ACCOUNT {
       string response = CharArrayToString( result );
 
       if ( res != 200 ) { 
-         Print( "Error in WebRequest. Error code: ", GetLastError() );
+         Print( "Error in WebRequest. Error code: ", res );
 
          // Retry the Call
          this.get_current_position_closing_action();
