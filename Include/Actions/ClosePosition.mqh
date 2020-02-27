@@ -31,6 +31,8 @@ void close_position( string type_, bool is_sl = false ) {
         // Reset Position
         position_.reset();
     } else {
+        Print( "Error in position closing! Code: "+ order_result.retcode );
+
         // Retry closing the position
         close_position( type_, is_sl );
     }
