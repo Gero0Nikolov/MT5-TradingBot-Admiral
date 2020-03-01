@@ -84,10 +84,10 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Read the Virtual Library from VL.txt
-   vl_.read();
+   //vl_.read();
 
    // Recover previously opened position if there is one
-   account_.recover();
+   //account_.recover();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -107,7 +107,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to Virtual Libary
-   vl_.save();
+   //vl_.save();
 
    // Virtual Library Debugger
    if ( debugger_.debug_virtual_library ) {
@@ -127,7 +127,7 @@ void OnTimer() {
 
    // Send ping to the server to check Position Actions
    if ( seconds == account_.ping_interval ) {
-      account_.get_current_position_closing_action();
+      //account_.get_current_position_closing_action();
 
       // Reset Seconds Counter
       seconds = 0;
@@ -163,7 +163,7 @@ void OnTick() {
          hour_.highest_price = hour_.opening_price;
 
          // Store to Virtual Libary
-         vl_.save();
+         //vl_.save();
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -186,7 +186,7 @@ void OnTick() {
          minute_.highest_price = hour_.opening_price;
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
@@ -223,7 +223,9 @@ void OnTick() {
          
          if ( position_type != 0 ) { // Position Type should be different than 0, to have desired direction
             if ( aggregator_.should_open( position_type ) ) {
-               vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", position_type == -1 ? current_tick.bid : current_tick.ask );               
+               if ( vl_.position_exists( "vp" ) == -1 ) { // In case the returned result is -1 then the position can be opened
+                  vt_.open_virtual_position( position_type == -1 ? "sell" : "buy", position_type == -1 ? current_tick.bid : current_tick.ask );
+               }
             }
          }
       }

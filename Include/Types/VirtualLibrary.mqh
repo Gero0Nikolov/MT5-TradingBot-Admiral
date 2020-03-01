@@ -166,6 +166,39 @@ class VIRTUAL_LIBRARY {
         this.vp_[ key ].copy_vp( vp_ );
     }
 
+    int position_exists( string navigator ) {
+        int key = -1;
+
+        if ( navigator == "vp" ) { // Search the Virtual Library by a new Virtual Position
+            VIRTUAL_POSITION vp_;
+
+            // Copy Current Trend Data
+            vp_.data_1m.copy_trend( trend_1m );
+            vp_.data_5m.copy_trend( trend_5m );
+            vp_.data_15m.copy_trend( trend_15m );
+            vp_.data_30m.copy_trend( trend_30m );
+            vp_.data_1h.copy_trend( trend_1h );
+
+            // Check if the desired New Position is exists in the Virtual Library (VL)
+            key = this.find_from_vp( vp_ );
+        } else if ( navigator == "np" ) { // Search the Virtual Library by a new Normal Position
+            POSITION position_;
+
+            // Copy Current Trend Data
+            position_.data_1m.copy_trend( trend_1m );
+            position_.data_5m.copy_trend( trend_5m );
+            position_.data_15m.copy_trend( trend_15m );
+            position_.data_30m.copy_trend( trend_30m );
+            position_.data_1h.copy_trend( trend_1h );
+
+            // Check if the desired New Position is exists in the Virtual Library (VL)
+            key = this.find_from_position( position_ );
+        }
+
+        // Return the key of the Position
+        return key;
+    }
+
     /*
     *   Virtual Library (VL) Actions from Normal Position Request
     */
