@@ -127,7 +127,7 @@ void OnTimer() {
 
    // Send ping to the server to check Position Actions
    if ( seconds == account_.ping_interval ) {
-      //account_.get_current_position_closing_action();
+      account_.get_current_position_closing_action();
 
       // Reset Seconds Counter
       seconds = 0;
