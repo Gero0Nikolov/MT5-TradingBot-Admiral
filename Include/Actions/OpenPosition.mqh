@@ -45,7 +45,7 @@ void open_position( string type, double price ) {
         position_.data_1h.copy_trend( trend_1h );
 
         // Send Open Position Notification
-        //account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
+        account_.open_position_notification( position_.type, position_.opening_price, position_.volume );
     } else {
         Print( "Error in position opening! Code: "+ order_result.retcode );
 
