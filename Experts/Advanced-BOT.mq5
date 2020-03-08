@@ -89,6 +89,9 @@ int OnInit(){
    // Recover previously opened position if there is one
    account_.recover();
 
+   // Get Account Status
+   account_.get_account_status();
+
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
    Print( "Account Currency: "+ account_.currency );
@@ -127,7 +130,7 @@ void OnTimer() {
 
    // Send ping to the server to check Position Actions
    if ( seconds == account_.ping_interval ) {
-      account_.get_current_position_closing_action();
+      account_.get_command_actions();
 
       // Reset Seconds Counter
       seconds = 0;

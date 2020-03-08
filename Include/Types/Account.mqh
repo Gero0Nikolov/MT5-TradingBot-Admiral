@@ -8,6 +8,7 @@ class ACCOUNT {
    double margin_call;
    int leverage;
    int ping_interval;
+   bool is_paused;
 
    ACCOUNT() {
       // Get Account Currency
@@ -33,6 +34,9 @@ class ACCOUNT {
 
       // Set Ping Interval in Seconds
       this.ping_interval = 10;
+
+      // Set default Running Status
+      this.is_paused = false;
    }
 
    void set_currency_exchange_rate() {
@@ -149,7 +153,42 @@ class ACCOUNT {
       }
    }
 
-   void get_current_position_closing_action() {
+   void get_account_status() {
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_gas&api_key="+ api_key;
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      string status = CharArrayToString( result );
+
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", res ); 
+
+         // Retry the call
+         this.get_account_status();   
+      } else if ( res == 200 ) {
+         if ( status != "false" ) {
+            if ( status == "running" ) { 
+               this.is_paused = false; 
+               Print( "Account is running!" );
+            } else if ( status == "paused" ) { 
+               this.is_paused = true; 
+               Print( "Account is paused!" );
+            }
+         } else {
+            Print( "Failed to get Account Status" );
+         }
+      }
+   }
+
+   void get_command_actions() {
       string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
 
       // Request Structure
@@ -168,19 +207,102 @@ class ACCOUNT {
          Print( "Error in WebRequest. Error code: ", res );
 
          // Retry the Call
-         this.get_current_position_closing_action();
+         this.get_command_actions();
       } else if ( res == 200 ) {
          if ( response != "Failed" ) {
-            if ( response == "true" ) {
-               // Get Current Position Data
-               position_.select = PositionSelect( Symbol() );
-               position_.profit = PositionGetDouble( POSITION_PROFIT );
+            if ( response != "false" ) {
+               string commands[];
+               bool split_result = StringSplit( response, StringGetCharacter( ",", 0 ), commands );
 
-               // Close the Position
-               close_position( position_.type, position_.profit > 0 ? false : true );
+               if ( split_result ) {
+                  // Go over the list of commands and execute them
+                  int commands_amount = ArraySize( commands );
+                  for ( int count_commands = 0; count_commands < commands_amount; count_commands++ ) {
+                     if ( commands[ count_commands ] == "close_position" ) { this.external_command_close_position(); }
+                     else if ( commands[ count_commands ] == "pause_bot" ) { this.external_command_pause_bot(); }
+                     else if ( commands[ count_commands ] == "run_bot" ) { this.external_command_run_bot(); }
+                  }
+               }
+            } else {
+               Print( "Current Position Actions Reading Failed" );
             }
          } else {
             Print( "Current Position Actions Reading Failed" );
+         }
+      }
+   }
+
+   void external_command_close_position() {
+      // Get Current Position Data
+      position_.select = PositionSelect( Symbol() );
+      position_.profit = PositionGetDouble( POSITION_PROFIT );
+
+      // Close the Position
+      close_position( position_.type, position_.profit > 0 ? false : true );
+   }
+
+   void external_command_pause_bot() {
+      // Pause the Bot
+      this.is_paused = true;
+
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_cp&api_key="+ api_key +"&command=pause_bot";
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      string response = CharArrayToString( result );
+
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", res );
+
+         // Retry the Call
+         this.external_command_pause_bot();
+      } else if ( res == 200 ) {
+         // Bot was Paused Successfully and returned a confirmation to the WP Server
+         if ( response == "true" ) {
+            Print( "Bot was paused succesfully!" );
+         } else {
+            Print( "Bot pausing failed!" );
+         }
+      }
+   }
+
+   void external_command_run_bot() {
+      // Pause the Bot
+      this.is_paused = false;
+
+      string api_key = IntegerToString( AccountInfoInteger( ACCOUNT_LOGIN ) );
+
+      // Request Structure
+      string cookie = NULL, headers;
+      char post[], result[];      
+      string data = "action=mt5_cp&api_key="+ api_key +"&command=run_bot";
+      StringToCharArray( data, post );
+      string url = "https://geronikolov.com/wp-admin/admin-ajax.php";
+
+      ResetLastError();
+
+      int res = WebRequest( "POST", url, cookie, NULL, 500, post, ArraySize( post ), result, headers );
+      string response = CharArrayToString( result );
+
+      if ( res != 200 ) { 
+         Print( "Error in WebRequest. Error code: ", res );
+
+         // Retry the Call
+         this.external_command_run_bot();
+      } else if ( res == 200 ) {
+         // Bot was Started Successfully and returned a confirmation to the WP Server
+         if ( response == "true" ) {
+            Print( "Bot was started succesfully!" );
+         } else {
+            Print( "Bot starting failed!" );
          }
       }
    }
