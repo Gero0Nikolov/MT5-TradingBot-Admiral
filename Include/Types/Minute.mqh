@@ -35,4 +35,16 @@ class MINUTE {
 
       return difference >= instrument_.opm;
    }
+
+   bool is_closing_spike( string type ) {
+      double difference = 0;
+
+      if ( type == "sell" ) {
+         difference = this.opening_price - this.actual_price;
+      } else if ( type == "buy" ) {
+         difference = this.actual_price - this.opening_price;
+      }
+
+      return difference >= instrument_.cpm;
+   }
 };

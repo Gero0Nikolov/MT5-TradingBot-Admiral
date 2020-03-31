@@ -106,7 +106,7 @@ int OnInit(){
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ account_.leverage );
    Print( "Virtual Library (VL) Size: "+ ( ArraySize( vl_.vp_red ) + ArraySize( vl_.vp_green ) ) );
-   Print( "VL RED: "+ ArraySize( vl_.vp_red ) );
+   Print( "VL Red: "+ ArraySize( vl_.vp_red ) );
    Print( "VL Green: "+ ArraySize( vl_.vp_green ) );
 
    return(INIT_SUCCEEDED);
@@ -118,7 +118,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to Virtual Libary
-   //vl_.save();
+   vl_.save();
 }
 
 // Expert timer function
@@ -147,7 +147,10 @@ void OnTick() {
    if ( SymbolInfoTick( Symbol(), current_tick ) ) {
       MqlDateTime current_time_structure;
       datetime current_time = TimeTradeServer();
-      TimeToStruct( current_time, current_time_structure );      
+      TimeToStruct( current_time, current_time_structure );
+      
+      // Set Hyper Volatility Measures
+      instrument_.hyper_volatility_measures();
 
       // Update Spread
       instrument_.spread = NormalizeDouble( current_tick.ask - current_tick.bid, 2 );

@@ -61,14 +61,14 @@ class AGGREGATOR {
             if ( type == -1 ) { // Sell
                 if (
                     trend_1m.direction < 0 &&              
-                    minute_.is_spike( "sell" )
+                    minute_.is_closing_spike( "sell" )
                 ) { 
                     flag = true;
                 }
             } else if ( type == 1 ) { // Buy
                 if (
                     trend_1m.direction > 0 &&
-                    minute_.is_spike( "buy" )
+                    minute_.is_closing_spike( "buy" )
                 ) { 
                     flag = true;
                 }
@@ -76,7 +76,7 @@ class AGGREGATOR {
         }
 
         // Check if Flag was not picked and perform TP || SL Action
-        if ( !flag ) { flag = tp_sl( original_type, opening_price, tp_price, sl_price ); }
+        //if ( !flag ) { flag = this.tp_sl( original_type, opening_price, tp_price, sl_price ); }
 
         return flag;
     }
@@ -85,13 +85,21 @@ class AGGREGATOR {
         bool flag = false;
 
         if ( type == -1 ) { // Sell
-            if ( minute_.actual_price < opening_price ) { // Position is Profitable
-
-            } else if ( minute_.actual_price >= opening_price ) { // Position is Losing
-
+            // if ( minute_.actual_price < opening_price ) { // Position is Profitable
+            //     if ( minute_.actual_price <= tp_price ) { flag = true; }
+            // } else 
+            
+            if ( minute_.actual_price >= opening_price ) { // Position is Losing
+                if ( minute_.actual_price >= sl_price ) { flag = true; }
             }
         } else if ( type == 1 ) { // Buy
-
+            // if ( minute_.actual_price > opening_price ) { // Position is Profitable
+            //     if ( minute_.actual_price >= tp_price ) { flag = true; }
+            // } else 
+            
+            if ( minute_.actual_price <= opening_price ) { // Position is Losing
+                if ( minute_.actual_price <= sl_price ) { flag = true; }
+            }
         }
 
         return flag;
