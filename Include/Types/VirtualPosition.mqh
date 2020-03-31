@@ -1,8 +1,11 @@
 class VIRTUAL_POSITION {
     public:    
     int type;
+    int curve;
     double opening_price;
     double closing_price;
+    double tp_price;
+    double sl_price;
     bool is_opened; // Status of the VP; If it's FALSE the position was closed, if it's TRUE then the VP is still on the run
     bool success; // If the success flag is TRUE then the position was closed by the TP, else if it's FALSE then the position was closed by SL
 
@@ -14,14 +17,17 @@ class VIRTUAL_POSITION {
 
     VIRTUAL_POSITION() {
         this.type = 0;
+        this.curve = month_.type;
         this.opening_price = 0;
         this.closing_price = 0;
+        this.tp_price = 0;
+        this.sl_price = 0;
         this.is_opened = false;
         this.success = false;
     }
 
     bool should_close() {
-        return aggregator_.should_close( this.type );
+        return aggregator_.should_close( this.type, this.opening_price, this.tp_price, this.sl_price );
     }
 
     bool was_profit() {
@@ -38,8 +44,11 @@ class VIRTUAL_POSITION {
 
     void copy_vp( VIRTUAL_POSITION &vp_ ) {
         this.type = vp_.type;
+        this.curve = vp_.curve;
         this.opening_price = vp_.opening_price;
         this.closing_price = vp_.closing_price;
+        this.tp_price = vp_.tp_price;
+        this.sl_price = vp_.sl_price;
         this.is_opened = vp_.is_opened;
         this.success = vp_.success;
 
@@ -53,8 +62,11 @@ class VIRTUAL_POSITION {
 
     void copy_position( POSITION &position_ ) {
         this.type = position_.type == "sell" ? -1 : 1;
+        this.curve = position_.curve;
         this.opening_price = position_.opening_price;
         this.closing_price = position_.closing_price;
+        this.tp_price = position_.tp_price;
+        this.sl_price = position_.sl_price;
         this.is_opened = false; // The Position will be destroyed after that so assume it's closed :D
         this.success = position_.success;
         
@@ -64,5 +76,15 @@ class VIRTUAL_POSITION {
         this.data_15m.copy_data_info( position_.data_15m );
         this.data_30m.copy_data_info( position_.data_30m );
         this.data_1h.copy_data_info( position_.data_1h );
+    }
+
+    void calculate_tp_sl() {
+        if ( type == -1 ) { // Sell
+            this.tp_price = this.opening_price - ( this.opening_price * instrument_.tpm );
+            this.sl_price = this.opening_price + ( this.opening_price * instrument_.slm );
+        } else if ( type == 1 ) { // Buy
+            this.tp_price = this.opening_price + ( this.opening_price * instrument_.tpm );
+            this.sl_price = this.opening_price - ( this.opening_price * instrument_.tpm );
+        }
     }
 }

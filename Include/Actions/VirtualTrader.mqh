@@ -14,8 +14,12 @@ class VIRTUAL_TRADER {
         
         // Register the new Virtual Position
         vp_[ key ].type = type == "sell" ? -1 : 1;
+        vp_[ key ].curve = month_.type;
         vp_[ key ].opening_price = type == "sell" ? opening_price : opening_price + instrument_.spread;
         vp_[ key ].is_opened = true;
+
+        // Calculate Virtual Position TP & SL
+        vp_[ key ].calculate_tp_sl();
 
         // Copy Trend Info
         vp_[ key ].data_1m.copy_trend( trend_1m );

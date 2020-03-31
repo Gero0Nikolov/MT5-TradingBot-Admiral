@@ -40,8 +40,11 @@ class AGGREGATOR {
         return flag;
    }
 
-   bool should_close( int type ) {
+    bool should_close( int type, double opening_price, double tp_price, double sl_price ) {
         bool flag = false;
+
+        // Cache Origianl Type
+        int original_type = type;
 
         // Convert Position Type to the oposite direction;
         type = type == -1 ? 1 : -1;
@@ -72,6 +75,25 @@ class AGGREGATOR {
             }
         }
 
+        // Check if Flag was not picked and perform TP || SL Action
+        if ( !flag ) { flag = tp_sl( original_type, opening_price, tp_price, sl_price ); }
+
         return flag;
-   }
+    }
+
+    bool tp_sl( int type, double opening_price, double tp_price, double sl_price ) {
+        bool flag = false;
+
+        if ( type == -1 ) { // Sell
+            if ( minute_.actual_price < opening_price ) { // Position is Profitable
+
+            } else if ( minute_.actual_price >= opening_price ) { // Position is Losing
+
+            }
+        } else if ( type == 1 ) { // Buy
+
+        }
+
+        return flag;
+    }
 };

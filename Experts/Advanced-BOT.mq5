@@ -15,7 +15,9 @@
 
 // Include Types
 #include "../Include/Types/Account.mqh";
+#include "../Include/Types/AverageData.mqh";
 #include "../Include/Types/InstrumentSetup.mqh";
+#include "../Include/Types/Month.mqh";
 #include "../Include/Types/Hour.mqh";
 #include "../Include/Types/Minute.mqh";
 #include "../Include/Types/Trend.mqh";
@@ -38,6 +40,7 @@ ADX adx_;
 BP bp_;
 
 // Initialize Classes - Trading Objects
+MONTH month_;
 HOUR hour_;
 MINUTE minute_;
 INSTRUMENT_SETUP instrument_;
@@ -86,11 +89,14 @@ int OnInit(){
    // Read the Virtual Library from VL.txt
    vl_.read();
 
+   // Recalculate Average Big Hour Size
+   //instrument_.recalculate_bhs();
+
    // Recover previously opened position if there is one
-   account_.recover();
+   //account_.recover();
 
    // Get Account Status
-   account_.get_account_status();
+   //account_.get_account_status();
 
    // Print Account Info
    Print( "Initial Deposit: "+ account_.initial_deposit );
@@ -99,7 +105,9 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ account_.leverage );
-   Print( "Virtual Library (VL) Size: "+ ArraySize( vl_.vp_ ) );
+   Print( "Virtual Library (VL) Size: "+ ( ArraySize( vl_.vp_red ) + ArraySize( vl_.vp_green ) ) );
+   Print( "VL RED: "+ ArraySize( vl_.vp_red ) );
+   Print( "VL Green: "+ ArraySize( vl_.vp_green ) );
 
    return(INIT_SUCCEEDED);
 }
@@ -110,12 +118,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to Virtual Libary
-   vl_.save();
-
-   // Virtual Library Debugger
-   if ( debugger_.debug_virtual_library ) {
-      vl_.print_library_size();
-   }
+   //vl_.save();
 }
 
 // Expert timer function
@@ -130,7 +133,7 @@ void OnTimer() {
 
    // Send ping to the server to check Position Actions
    if ( seconds == account_.ping_interval ) {
-      account_.get_command_actions();
+      //account_.get_command_actions();
 
       // Reset Seconds Counter
       seconds = 0;
@@ -149,6 +152,28 @@ void OnTick() {
       // Update Spread
       instrument_.spread = NormalizeDouble( current_tick.ask - current_tick.bid, 2 );
       
+      // Reset the Month
+      if ( month_.is_set && current_time_structure.mon != month_.key ) {
+         month_.reset();
+      }
+
+      // Init the Month or just Update it
+      if ( !month_.is_set ) {
+         month_.is_set = true;
+         month_.key = current_time_structure.mon;
+         month_.opening_price = iOpen( Symbol(), PERIOD_MN1, 0 );
+         month_.lowest_price = iLow( Symbol(), PERIOD_MN1, 0 );
+         month_.highest_price = iHigh( Symbol(), PERIOD_MN1, 0 );
+         month_.actual_price = current_tick.bid;
+      } else {
+         month_.actual_price = current_tick.bid;
+         month_.lowest_price = month_.lowest_price > month_.actual_price ? month_.actual_price : month_.lowest_price;
+         month_.highest_price = month_.highest_price < month_.actual_price ? month_.actual_price : month_.highest_price;
+
+         // Recalculate Month Type on Update
+         month_.recalculate_type();
+      }
+
       // Reset the Hour
       if ( hour_.is_set && current_time_structure.hour != hour_.key ) {
          hour_.reset(); 
@@ -165,8 +190,11 @@ void OnTick() {
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
 
+         // Recalculate Average Big Hour Size
+         //instrument_.recalculate_bhs();
+
          // Store to Virtual Libary
-         vl_.save();
+         //vl_.save();
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -189,7 +217,7 @@ void OnTick() {
          minute_.highest_price = hour_.opening_price;
 
          // Send Ping
-         account_.ping();
+         //account_.ping();
       } else if ( minute_.is_set == true ) {         
          minute_.sell_price = current_tick.bid;
          minute_.actual_price = current_tick.bid;
