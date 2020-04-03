@@ -17,7 +17,7 @@ class VIRTUAL_POSITION {
 
     VIRTUAL_POSITION() {
         this.type = 0;
-        this.curve = month_.type;
+        this.curve = 0;
         this.opening_price = 0;
         this.closing_price = 0;
         this.tp_price = 0;

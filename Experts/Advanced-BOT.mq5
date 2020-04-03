@@ -197,7 +197,7 @@ void OnTick() {
          //instrument_.recalculate_bhs();
 
          // Store to Virtual Libary
-         //vl_.save();
+         vl_.save();
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;

@@ -163,6 +163,7 @@ class VIRTUAL_LIBRARY {
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
                 if (
+                    this.vp_red[ count_vp ].type == vp_.type &&
                     this.vp_red[ count_vp ].data_1m.is_volatile == vp_.data_1m.is_volatile &&
                     this.vp_red[ count_vp ].data_1m.previous_strength == vp_.data_1m.previous_strength &&
                     this.vp_red[ count_vp ].data_1m.strength == vp_.data_1m.strength &&
@@ -181,6 +182,7 @@ class VIRTUAL_LIBRARY {
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
                 if (
+                    this.vp_green[ count_vp ].type == vp_.type &&
                     this.vp_green[ count_vp ].data_1m.is_volatile == vp_.data_1m.is_volatile &&
                     this.vp_green[ count_vp ].data_1m.previous_strength == vp_.data_1m.previous_strength &&
                     this.vp_green[ count_vp ].data_1m.strength == vp_.data_1m.strength &&
@@ -280,11 +282,13 @@ class VIRTUAL_LIBRARY {
 
     int find_from_position( POSITION &position_ ) {
         int key = -1;
+        int type = position_.type == "sell" ? -1 : 1;
         if ( position_.curve < 0 ) { // Red Curve
             int count_vl = ArraySize( this.vp_red );
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
                 if (
+                    this.vp_red[ count_vp ].type == type &&
                     this.vp_red[ count_vp ].data_1m.is_volatile == position_.data_1m.is_volatile &&
                     this.vp_red[ count_vp ].data_1m.previous_strength == position_.data_1m.previous_strength &&
                     this.vp_red[ count_vp ].data_1m.strength == position_.data_1m.strength &&
@@ -303,6 +307,7 @@ class VIRTUAL_LIBRARY {
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
                 if (
+                    this.vp_green[ count_vp ].type == type &&
                     this.vp_green[ count_vp ].data_1m.is_volatile == position_.data_1m.is_volatile &&
                     this.vp_green[ count_vp ].data_1m.previous_strength == position_.data_1m.previous_strength &&
                     this.vp_green[ count_vp ].data_1m.strength == position_.data_1m.strength &&

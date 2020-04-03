@@ -14,7 +14,7 @@ class VIRTUAL_TRADER {
         
         // Register the new Virtual Position
         vp_[ key ].type = type == "sell" ? -1 : 1;
-        vp_[ key ].curve = month_.type;
+        vp_[ key ].curve = vp_[ key ].type;
         vp_[ key ].opening_price = type == "sell" ? opening_price : opening_price + instrument_.spread;
         vp_[ key ].is_opened = true;
 

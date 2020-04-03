@@ -30,12 +30,12 @@ void open_position( string type, double price ) {
         if ( order_result.retcode == instrument_.success_code ) {
             // Set the Position Data
             position_.type = type;
+            position_.curve = type == "sell" ? -1 : 1;
             position_.opening_price = price;
             position_.volume = order_result.volume; 
             position_.spread = instrument_.spread;
             position_.is_opened = true;
             position_.picked = true;
-            position_.curve = month_.type;
 
             // Calculate TP & SL Price
             position_.calculate_tp_sl();

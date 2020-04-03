@@ -24,7 +24,7 @@ class POSITION {
 
    POSITION() {
       this.id = 0;
-      this.curve = month_.type;
+      this.curve = 0;
       this.is_opened = false;
       this.select = false;
       this.picked = false;
@@ -41,7 +41,7 @@ class POSITION {
 
    void reset() {
       this.id += 1;
-      this.curve = month_.type;
+      this.curve = 0;
       this.select = false;
       this.picked = false;
       this.success = false;
@@ -86,6 +86,12 @@ class POSITION {
    bool is_known_as_good( int type ) {
       bool flag = false;
       POSITION position_;
+
+      // Set Position Type
+      position_.type = type == -1 ? "sell" : "buy";
+
+      // Set Position Curve
+      position_.curve = type;
 
       // Copy Current Trend Data
       position_.data_1m.copy_trend( trend_1m );
