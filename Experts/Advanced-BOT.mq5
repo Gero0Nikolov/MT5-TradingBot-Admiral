@@ -24,14 +24,11 @@
 #include "../Include/Types/PositionData.mqh";
 #include "../Include/Types/Position.mqh";
 #include "../Include/Types/Aggregator.mqh";
-#include "../Include/Types/VirtualPosition.mqh";
-#include "../Include/Types/VirtualLibrary.mqh";
 #include "../Include/Types/Debugger.mqh";
 
 // Include Functions, the so called Actions
 #include "../Include/Actions/OpenPosition.mqh";
 #include "../Include/Actions/ClosePosition.mqh";
-#include "../Include/Actions/VirtualTrader.mqh";
 
 // Initialize Indicators
 RSI rsi_;
@@ -54,11 +51,6 @@ TREND trend_5m;
 TREND trend_15m;
 TREND trend_30m;
 TREND trend_1h;
-
-// Initialize Virtual Trader
-VIRTUAL_TRADER vt_;
-VIRTUAL_POSITION vp_[];
-VIRTUAL_LIBRARY vl_;
 
 // MQL Defaults
 MqlTradeRequest order_request = {0};
@@ -87,10 +79,7 @@ int OnInit(){
    EventSetTimer( 1 );
 
    // Read the Virtual Library from VL.txt
-   vl_.read();
-
-   // Recalculate Average Big Hour Size
-   //instrument_.recalculate_bhs();
+   //vl_.read();
 
    // Recover previously opened position if there is one
    //account_.recover();
@@ -105,9 +94,6 @@ int OnInit(){
    Print( "Trading Percent: "+ account_.trading_percent );
    Print( "Free Margin: "+ ( account_.initial_deposit * account_.currency_exchange_rate ) );
    Print( "Leverage: "+ account_.leverage );
-   Print( "Virtual Library (VL) Size: "+ ( ArraySize( vl_.vp_red ) + ArraySize( vl_.vp_green ) ) );
-   Print( "VL Red: "+ ArraySize( vl_.vp_red ) );
-   Print( "VL Green: "+ ArraySize( vl_.vp_green ) );
 
    return(INIT_SUCCEEDED);
 }
@@ -118,7 +104,7 @@ void OnDeinit( const int reason ) {
    EventKillTimer();
 
    // Store to Virtual Libary
-   vl_.save();
+   //vl_.save();
 }
 
 // Expert timer function
@@ -148,9 +134,6 @@ void OnTick() {
       MqlDateTime current_time_structure;
       datetime current_time = TimeTradeServer();
       TimeToStruct( current_time, current_time_structure );
-      
-      // Set Hyper Volatility Measures
-      instrument_.hyper_volatility_measures();
 
       // Update Spread
       instrument_.spread = NormalizeDouble( current_tick.ask - current_tick.bid, 2 );
@@ -193,11 +176,8 @@ void OnTick() {
          hour_.lowest_price = hour_.opening_price;
          hour_.highest_price = hour_.opening_price;
 
-         // Recalculate Average Big Hour Size
-         //instrument_.recalculate_bhs();
-
          // Store to Virtual Libary
-         vl_.save();
+         //vl_.save();
       } else if ( hour_.is_set ) {         
          hour_.sell_price = current_tick.bid;
          hour_.actual_price = current_tick.bid;
@@ -251,6 +231,8 @@ void OnTick() {
          }
       }
 
+      // VT - DISABLED
+      /*
       // Virtual Trader
       if ( !position_.picked ) {
          position_type = minute_.opening_price > minute_.actual_price ? -1 : ( minute_.opening_price < minute_.actual_price ? 1 : 0 );
@@ -266,5 +248,6 @@ void OnTick() {
 
       // Check Virtual Positions
       vt_.check_virtual_positions();
+      */
    }
 }

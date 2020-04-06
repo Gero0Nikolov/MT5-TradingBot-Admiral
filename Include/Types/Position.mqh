@@ -66,10 +66,7 @@ class POSITION {
    bool should_open( int type ) {
       bool flag = false;
 
-      if ( 
-         aggregator_.should_open( type ) &&
-         this.is_known_as_good( type )
-      ) {
+      if ( aggregator_.should_open( type ) ) {
          flag = true;
       }
 
@@ -82,37 +79,6 @@ class POSITION {
 
    void calculate_margin_level() {
       this.margin_level = AccountInfoDouble( ACCOUNT_MARGIN_LEVEL );
-   }
-
-   bool is_known_as_good( int type ) {
-      bool flag = false;
-      POSITION position_;
-
-      // Set Position Type
-      position_.type = type == -1 ? "sell" : "buy";
-
-      // Set Position Curve
-      position_.curve = type;
-
-      // Copy Current Trend Data
-      position_.data_1m.copy_trend( trend_1m );
-      position_.data_5m.copy_trend( trend_5m );
-      position_.data_15m.copy_trend( trend_15m );
-      position_.data_30m.copy_trend( trend_30m );
-      position_.data_1h.copy_trend( trend_1h );
-
-      // Check if the desired New Position is exists in the Virtual Library (VL)
-      int vp_key = vl_.find_from_position( position_ );
-
-      if ( vp_key > -1 ) {
-         if ( position_.curve < 0 ) { // Red Curve
-            flag = vl_.vp_red[ vp_key ].success;
-         } else if ( position_.curve > 0 ) { // Green Curve
-            flag = vl_.vp_green[ vp_key ].success;
-         }
-      }
-
-      return flag;
    }
 
    string serialize() {
@@ -163,19 +129,6 @@ class POSITION {
          this.data_15m.deserialize( item_[ 21 ] +","+ item_[ 22 ] +","+ item_[ 23 ] +","+ item_[ 24 ] );
          this.data_30m.deserialize( item_[ 25 ] +","+ item_[ 26 ] +","+ item_[ 27 ] +","+ item_[ 28 ] );
          this.data_1h.deserialize( item_[ 29 ] +","+ item_[ 30 ] +","+ item_[ 31 ] +","+ item_[ 32 ] );
-
-         // Calculate Position TP & SL after recovery
-         this.calculate_tp_sl();
-      }
-   }
-
-   void calculate_tp_sl() {
-      if ( this.type == "sell" ) {
-         this.tp_price = this.opening_price - ( this.opening_price * instrument_.tpm );
-         this.sl_price = this.opening_price + ( this.opening_price * instrument_.slm );
-      } else if ( this.type == "buy" ) {
-         this.tp_price = this.opening_price + ( this.opening_price * instrument_.tpm );
-         this.sl_price = this.opening_price - ( this.opening_price * instrument_.slm );
       }
    }
 };

@@ -11,25 +11,20 @@ class AGGREGATOR {
         trend_1h.get_direction( PERIOD_H1 );
 
         if (
-            !hour_.is_big() &&
             !trend_1m.is_volatile &&
             trend_1m.previous_strength != 1 &&
             trend_1m.strength > -1
         ) {
             if ( type == -1 ) { // Sell
                 if (
-                    trend_1m.direction < 0 &&              
-                    minute_.is_spike( "sell" )
+                    trend_1m.direction < 0
                 ) { 
                     if ( hour_.is_in_direction( "sell" ) ) {
                         flag = true;
                     }
                 }
             } else if ( type == 1 ) { // Buy
-                if (
-                    trend_1m.direction > 0 &&
-                    minute_.is_spike( "buy" )
-                ) { 
+                if ( trend_1m.direction > 0 ) { 
                     if ( hour_.is_in_direction( "buy" ) ) {
                         flag = true;
                     }
@@ -52,46 +47,19 @@ class AGGREGATOR {
         // Recalculate Trend
         trend_1m.get_direction( PERIOD_M1 );
 
-        if (
-            !hour_.is_big() &&
+        if (            
             !trend_1m.is_volatile &&
             trend_1m.previous_strength != 1 &&
             trend_1m.strength > -1
         ) {
             if ( type == -1 ) { // Sell
-                if (
-                    trend_1m.direction < 0 &&              
-                    minute_.is_closing_spike( "sell" )
-                ) { 
+                if ( trend_1m.direction < 0 ) { 
                     flag = true;
                 }
             } else if ( type == 1 ) { // Buy
-                if (
-                    trend_1m.direction > 0 &&
-                    minute_.is_closing_spike( "buy" )
-                ) { 
+                if ( trend_1m.direction > 0 ) { 
                     flag = true;
                 }
-            }
-        }
-
-        return flag;
-    }
-
-    bool tp_sl( int type, double opening_price, double tp_price, double sl_price ) {
-        bool flag = false;
-
-        if ( type == -1 ) { // Sell
-            if ( minute_.actual_price < opening_price ) { // Position is Profitable
-                if ( minute_.actual_price <= tp_price ) { flag = true; }
-            } else if ( minute_.actual_price >= opening_price ) { // Position is Losing
-                if ( minute_.actual_price >= sl_price ) { flag = true; }
-            }
-        } else if ( type == 1 ) { // Buy
-            if ( minute_.actual_price > opening_price ) { // Position is Profitable
-                if ( minute_.actual_price >= tp_price ) { flag = true; }
-            } else if ( minute_.actual_price <= opening_price ) { // Position is Losing
-                if ( minute_.actual_price <= sl_price ) { flag = true; }
             }
         }
 

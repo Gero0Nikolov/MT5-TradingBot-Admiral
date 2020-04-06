@@ -36,9 +36,6 @@ void open_position( string type, double price ) {
             position_.spread = instrument_.spread;
             position_.is_opened = true;
             position_.picked = true;
-
-            // Calculate TP & SL Price
-            position_.calculate_tp_sl();
             
             // Calculate Margin Level
             position_.calculate_margin_level();

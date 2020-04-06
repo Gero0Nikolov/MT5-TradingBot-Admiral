@@ -22,9 +22,6 @@ void close_position( string type_, bool is_sl = false ) {
         position_.closing_price = price;
         position_.success = is_sl ? false : true;
 
-        // Perform an update to the Virtual Library (VL) from Normal Position
-        vl_.update_from_position( position_ );
-
         // Notify the Admin the position was closed
         //account_.closed_position_notification( is_sl );
 
