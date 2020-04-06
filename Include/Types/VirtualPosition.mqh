@@ -87,4 +87,68 @@ class VIRTUAL_POSITION {
             this.sl_price = this.opening_price - ( this.opening_price * instrument_.tpm );
         }
     }
+
+    bool is_equal_to_vp( VIRTUAL_POSITION &vp_ ) {
+        bool flag = false;
+
+        if (
+            this.type == vp_.type &&
+            this.data_1m.is_volatile == vp_.data_1m.is_volatile &&
+            this.data_1m.previous_strength == vp_.data_1m.previous_strength &&
+            this.data_1m.strength == vp_.data_1m.strength &&
+            this.data_1m.direction == vp_.data_1m.direction &&
+            this.data_5m.is_volatile == vp_.data_5m.is_volatile &&
+            this.data_5m.previous_strength == vp_.data_5m.previous_strength &&
+            this.data_5m.strength == vp_.data_5m.strength &&
+            this.data_5m.direction == vp_.data_5m.direction &&
+            this.data_15m.is_volatile == vp_.data_15m.is_volatile &&
+            this.data_15m.previous_strength == vp_.data_15m.previous_strength &&
+            this.data_15m.strength == vp_.data_15m.strength &&
+            this.data_15m.direction == vp_.data_15m.direction &&
+            this.data_30m.is_volatile == vp_.data_30m.is_volatile &&
+            this.data_30m.previous_strength == vp_.data_30m.previous_strength &&
+            this.data_30m.strength == vp_.data_30m.strength &&
+            this.data_30m.direction == vp_.data_30m.direction &&
+            this.data_1h.is_volatile == vp_.data_1h.is_volatile &&
+            this.data_1h.previous_strength == vp_.data_1h.previous_strength &&
+            this.data_1h.strength == vp_.data_1h.strength &&
+            this.data_1h.direction == vp_.data_1h.direction
+        ) {
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    bool is_equal_to_position( POSITION &position_ ) {
+        bool flag = false;
+
+        if (
+            this.type == position_.type &&
+            this.data_1m.is_volatile == position_.data_1m.is_volatile &&
+            this.data_1m.previous_strength == position_.data_1m.previous_strength &&
+            this.data_1m.strength == position_.data_1m.strength &&
+            this.data_1m.direction == position_.data_1m.direction &&
+            this.data_5m.is_volatile == position_.data_5m.is_volatile &&
+            this.data_5m.previous_strength == position_.data_5m.previous_strength &&
+            this.data_5m.strength == position_.data_5m.strength &&
+            this.data_5m.direction == position_.data_5m.direction &&
+            this.data_15m.is_volatile == position_.data_15m.is_volatile &&
+            this.data_15m.previous_strength == position_.data_15m.previous_strength &&
+            this.data_15m.strength == position_.data_15m.strength &&
+            this.data_15m.direction == position_.data_15m.direction &&
+            this.data_30m.is_volatile == position_.data_30m.is_volatile &&
+            this.data_30m.previous_strength == position_.data_30m.previous_strength &&
+            this.data_30m.strength == position_.data_30m.strength &&
+            this.data_30m.direction == position_.data_30m.direction &&
+            this.data_1h.is_volatile == position_.data_1h.is_volatile &&
+            this.data_1h.previous_strength == position_.data_1h.previous_strength &&
+            this.data_1h.strength == position_.data_1h.strength &&
+            this.data_1h.direction == position_.data_1h.direction
+        ) {
+            flag = true;
+        }
+
+        return flag;
+    }
 }

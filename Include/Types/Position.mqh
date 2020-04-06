@@ -57,6 +57,7 @@ class POSITION {
       
       // Reset Position Data
       this.data_1m.reset();
+      this.data_5m.reset();
       this.data_15m.reset();
       this.data_30m.reset();
       this.data_1h.reset();

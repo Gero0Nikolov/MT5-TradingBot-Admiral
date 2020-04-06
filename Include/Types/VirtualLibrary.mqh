@@ -162,17 +162,7 @@ class VIRTUAL_LIBRARY {
             int count_vl = ArraySize( this.vp_red );
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
-                if (
-                    this.vp_red[ count_vp ].type == vp_.type &&
-                    this.vp_red[ count_vp ].data_1m.is_volatile == vp_.data_1m.is_volatile &&
-                    this.vp_red[ count_vp ].data_1m.previous_strength == vp_.data_1m.previous_strength &&
-                    this.vp_red[ count_vp ].data_1m.strength == vp_.data_1m.strength &&
-                    this.vp_red[ count_vp ].data_1m.direction == vp_.data_1m.direction &&
-                    this.vp_red[ count_vp ].data_1h.is_volatile == vp_.data_1h.is_volatile &&
-                    this.vp_red[ count_vp ].data_1h.previous_strength == vp_.data_1h.previous_strength &&
-                    this.vp_red[ count_vp ].data_1h.strength == vp_.data_1h.strength &&
-                    this.vp_red[ count_vp ].data_1h.direction == vp_.data_1h.direction
-                ) {
+                if ( this.vp_red[ count_vp ].is_equal_to_vp( vp_ ) ) {
                     key = count_vp;
                     break;
                 }
@@ -181,17 +171,7 @@ class VIRTUAL_LIBRARY {
             int count_vl = ArraySize( this.vp_green );
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
-                if (
-                    this.vp_green[ count_vp ].type == vp_.type &&
-                    this.vp_green[ count_vp ].data_1m.is_volatile == vp_.data_1m.is_volatile &&
-                    this.vp_green[ count_vp ].data_1m.previous_strength == vp_.data_1m.previous_strength &&
-                    this.vp_green[ count_vp ].data_1m.strength == vp_.data_1m.strength &&
-                    this.vp_green[ count_vp ].data_1m.direction == vp_.data_1m.direction &&
-                    this.vp_green[ count_vp ].data_1h.is_volatile == vp_.data_1h.is_volatile &&
-                    this.vp_green[ count_vp ].data_1h.previous_strength == vp_.data_1h.previous_strength &&
-                    this.vp_green[ count_vp ].data_1h.strength == vp_.data_1h.strength &&
-                    this.vp_green[ count_vp ].data_1h.direction == vp_.data_1h.direction
-                ) {
+                if ( this.vp_green[ count_vp ].is_equal_to_vp( vp_ ) ) {
                     key = count_vp;
                     break;
                 }
@@ -234,11 +214,17 @@ class VIRTUAL_LIBRARY {
         }
     }
 
-    int position_exists( string navigator ) {
+    bool position_exists( string navigator, int type ) {
         int key = -1;
 
         if ( navigator == "vp" ) { // Search the Virtual Library by a new Virtual Position
             VIRTUAL_POSITION vp_;
+
+            // Set VP Type
+            vp_.type = type;
+            
+            // Set VP Curve
+            vp_.curve = type;
 
             // Copy Current Trend Data
             vp_.data_1m.copy_trend( trend_1m );
@@ -252,6 +238,12 @@ class VIRTUAL_LIBRARY {
         } else if ( navigator == "np" ) { // Search the Virtual Library by a new Normal Position
             POSITION position_;
 
+            // Set Position Type
+            position_.type = type == -1 ? "sell" : "buy";
+
+            // Set Position Curve
+            position_.curve = type;
+
             // Copy Current Trend Data
             position_.data_1m.copy_trend( trend_1m );
             position_.data_5m.copy_trend( trend_5m );
@@ -264,7 +256,7 @@ class VIRTUAL_LIBRARY {
         }
 
         // Return the key of the Position
-        return key;
+        return key > -1;
     }
 
     /*
@@ -287,17 +279,7 @@ class VIRTUAL_LIBRARY {
             int count_vl = ArraySize( this.vp_red );
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
-                if (
-                    this.vp_red[ count_vp ].type == type &&
-                    this.vp_red[ count_vp ].data_1m.is_volatile == position_.data_1m.is_volatile &&
-                    this.vp_red[ count_vp ].data_1m.previous_strength == position_.data_1m.previous_strength &&
-                    this.vp_red[ count_vp ].data_1m.strength == position_.data_1m.strength &&
-                    this.vp_red[ count_vp ].data_1m.direction == position_.data_1m.direction &&
-                    this.vp_red[ count_vp ].data_1h.is_volatile == position_.data_1h.is_volatile &&
-                    this.vp_red[ count_vp ].data_1h.previous_strength == position_.data_1h.previous_strength &&
-                    this.vp_red[ count_vp ].data_1h.strength == position_.data_1h.strength &&
-                    this.vp_red[ count_vp ].data_1h.direction == position_.data_1h.direction
-                ) {
+                if ( this.vp_red[ count_vp ].is_equal_to_position( position_ ) ) {
                     key = count_vp;
                     break;
                 }
@@ -306,17 +288,7 @@ class VIRTUAL_LIBRARY {
             int count_vl = ArraySize( this.vp_green );
 
             for ( int count_vp = 0; count_vp < count_vl; count_vp++ ) {
-                if (
-                    this.vp_green[ count_vp ].type == type &&
-                    this.vp_green[ count_vp ].data_1m.is_volatile == position_.data_1m.is_volatile &&
-                    this.vp_green[ count_vp ].data_1m.previous_strength == position_.data_1m.previous_strength &&
-                    this.vp_green[ count_vp ].data_1m.strength == position_.data_1m.strength &&
-                    this.vp_green[ count_vp ].data_1m.direction == position_.data_1m.direction &&
-                    this.vp_green[ count_vp ].data_1h.is_volatile == position_.data_1h.is_volatile &&
-                    this.vp_green[ count_vp ].data_1h.previous_strength == position_.data_1h.previous_strength &&
-                    this.vp_green[ count_vp ].data_1h.strength == position_.data_1h.strength &&
-                    this.vp_green[ count_vp ].data_1h.direction == position_.data_1h.direction
-                ) {
+                if ( this.vp_green[ count_vp ].is_equal_to_position( position_ ) ) {
                     key = count_vp;
                     break;
                 }
